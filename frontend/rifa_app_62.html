@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Rifas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            margin: 0;
+            padding-top: 80px;
+        }
+
+        /* Navegación */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-links a.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .numbers-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #4834d4, #686de0);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .number-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .number-cell:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: scale(1.05);
+        }
+
+        .number-cell.selected {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            border-color: #4caf50;
+            transform: scale(1.1);
+        }
+
+        .number-cell.winner {
+            background: linear-gradient(45deg, #ffd700, #ffb347);
+            color: #333;
+            border-color: #ffd700;
+            animation: pulse 1s infinite;
+        }
+
+        .number-cell.sold {
+            background: #ff6b6b !important;
+            color: white !important;
+            cursor: not-allowed !important;
+            border-color: #ff6b6b !important;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1.1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1.1); }
+        }
+
+        .cart-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .cart-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+
+        .cart-title {
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        .cart-count {
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            margin-left: auto;
+        }
+
+        .cart-items {
+            overflow-y: auto;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            max-height: 400px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-number {
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .remove-btn:hover {
+            background: #ff3742;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .winner-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .winner-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px) scale(0.8); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .winner-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin: 20px 0;
+        }
+
+        .winner-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1001;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification.error {
+            background: #ff6b6b;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">🎲 SimulaRifa</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#" class="active">Simulador</a></li>
+                <li><a href="http://localhost:3000">🔗 Ir al Backend</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1>🎲 Simulador de Rifas</h1>
+            <p class="subtitle">Versión con Backend - Simula sorteos para eventos, fiestas y actividades grupales</p>
+        </header>
+
+        <div class="main-content">
+            <div class="numbers-section">
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="selectRandomNumber()">
+                        🎯 Elegir al Azar
+                    </button>
+                    <button class="btn btn-primary" onclick="clearSelection()">
+                        🗑️ Limpiar Todo
+                    </button>
+                    <button class="btn btn-success" onclick="drawWinner()">
+                        🏆 Simular Sorteo
+                    </button>
+                </div>
+                
+                <div class="numbers-grid" id="numbersGrid">
+                    <!-- Los números se generan con JavaScript -->
+                </div>
+            </div>
+
+            <div class="cart-section">
+                <div class="cart-header">
+                    <span class="cart-icon">🎯</span>
+                    <h3 class="cart-title">Números Seleccionados</h3>
+                    <div class="cart-count" id="cartCount">0</div>
+                </div>
+                
+                <div class="cart-items" id="cartItems">
+                    <div class="empty-cart">
+                        No has seleccionado números aún
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="width: 100%;" onclick="drawWinner()">
+                    🎊 ¡Simular Sorteo!
+                </button>
+            </div>
+        </div>
+
+        <div class="winner-modal" id="winnerModal" style="display: none;">
+            <div class="winner-content">
+                <h2>🎉 ¡Tenemos un Ganador! 🎉</h2>
+                <div class="winner-display" id="winnerNumber">--</div>
+                <p class="winner-text">¡Felicidades al ganador del número <span id="winnerText">--</span>!</p>
+                <button class="btn btn-secondary" onclick="closeWinnerModal()">
+                    ✓ Cerrar
+                </button>
+                <button class="btn btn-primary" onclick="resetGame()" style="margin-left: 10px;">
+                    🔄 Nueva Simulación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedNumbers = [];
+        let winnerNumber = null;
+
+        // Generar la grilla de números
+        function generateNumbersGrid() {
+            const grid = document.getElementById('numbersGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i <= 99; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'number-cell';
+                cell.textContent = i.toString().padStart(2, '0');
+                cell.onclick = () => toggleNumber(i);
+                cell.id = `number-${i}`;
+                grid.appendChild(cell);
+            }
+        }
+
+        // Alternar selección de número
+        function toggleNumber(number) {
+            const cell = document.getElementById(`number-${number}`);
+            const index = selectedNumbers.indexOf(number);
+            
+            if (index > -1) {
+                // Deseleccionar
+                selectedNumbers.splice(index, 1);
+                cell.classList.remove('selected');
+            } else {
+                // Seleccionar
+                selectedNumbers.push(number);
+                cell.classList.add('selected');
+            }
+            
+            updateCart();
+        }
+
+        // Actualizar carrito
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            
+            cartCount.textContent = selectedNumbers.length;
+            
+            if (selectedNumbers.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart">No has seleccionado números aún</div>';
+                return;
+            }
+            
+            const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b);
+            cartItems.innerHTML = sortedNumbers.map(number => `
+                <div class="cart-item">
+                    <span class="cart-item-number">${number.toString().padStart(2, '0')}</span>
+                    <button class="remove-btn" onclick="toggleNumber(${number})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        // Seleccionar número al azar
+        function selectRandomNumber() {
+            const randomNumber = Math.floor(Math.random() * 100);
+            
+            if (!selectedNumbers.includes(randomNumber)) {
+                selectedNumbers.push(randomNumber);
+                document.getElementById(`number-${randomNumber}`).classList.add('selected');
+                updateCart();
+            }
+        }
+
+        // Limpiar selección
+        function clearSelection() {
+            selectedNumbers.forEach(number => {
+                const cell = document.getElementById(`number-${number}`);
+                cell.classList.remove('selected', 'winner');
+            });
+            selectedNumbers = [];
+            winnerNumber = null;
+            updateCart();
+            
+            const winnerModal = document.getElementById('winnerModal');
+            if (winnerModal) {
+                winnerModal.style.display = 'none';
+            }
+        }
+
+        // Sortear ganador
+        function drawWinner() {
+            if (selectedNumbers.length === 0) {
+                showNotification('¡Primero debes seleccionar al menos un número!', 'error');
+                return;
+            }
+
+            // Limpiar ganador anterior
+            if (winnerNumber !== null) {
+                document.getElementById(`number-${winnerNumber}`).classList.remove('winner');
+            }
+
+            // Seleccionar ganador al azar
+            const randomIndex = Math.floor(Math.random() * selectedNumbers.length);
+            winnerNumber = selectedNumbers[randomIndex];
+            
+            // Mostrar animación
+            const winnerCell = document.getElementById(`number-${winnerNumber}`);
+            winnerCell.classList.add('winner');
+            
+            // Mostrar modal de resultado
+            const winnerDisplay = document.getElementById('winnerNumber');
+            const winnerText = document.getElementById('winnerText');
+            const winnerModal = document.getElementById('winnerModal');
+            
+            winnerDisplay.textContent = winnerNumber.toString().padStart(2, '0');
+            winnerText.textContent = winnerNumber.toString().padStart(2, '0');
+            winnerModal.style.display = 'flex';
+        }
+
+        // Cerrar modal de ganador
+        function closeWinnerModal() {
+            document.getElementById('winnerModal').style.display = 'none';
+        }
+
+        // Resetear juego
+        function resetGame() {
+            clearSelection();
+            closeWinnerModal();
+        }
+
+        // Función para mostrar notificaciones
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Navegación móvil
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            generateNumbersGrid();
+            updateCart();
+        });
+    </script>
+</body>
+</html>
