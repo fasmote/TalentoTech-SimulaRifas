@@ -1,96 +1,90 @@
-// ========================================
-// SERVIDOR EXPRESS CON BASE DE DATOS - PASO 2
-// ========================================
+require('dotenv').config(); // Cargar variables de entorno al inicio
 
-// 1. Importamos las librerías que necesitamos
 const express = require('express');
-const path = require('path');
 const cors = require('cors');
+const path = require('path');
+const database = require('./database/database');
 
-// 2. Importar la base de datos
-const { db, inicializarBaseDatos, probarConexion } = require('./database/database');
+// Importar rutas
+const authRoutes = require('./routes/auth');
 
-// 3. Creamos nuestra aplicación Express
 const app = express();
-
-// 4. Configuramos el puerto (donde va a "escuchar" nuestro servidor)
 const PORT = process.env.PORT || 3000;
 
-// 5. Middleware básico (piénsalo como "filtros" que procesan las peticiones)
-app.use(cors()); // Permite que el frontend se conecte al backend
-app.use(express.json()); // Permite leer datos JSON que envíe el frontend
-app.use(express.static(path.join(__dirname, '../frontend'))); // Sirve archivos estáticos
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// 6. Nuestra primera ruta - cuando alguien vaya a http://localhost:3000/
+// Servir archivos estáticos
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Rutas de API
+app.use('/api/auth', authRoutes);
+
+// Ruta principal - servir el HTML
 app.get('/', (req, res) => {
-    res.send(`
-        <h1>🎲 ¡Servidor de Rifas Funcionando!</h1>
-        <p>¡Felicidades! Tu servidor Express está corriendo perfectamente.</p>
-        <p><strong>Próximos pasos:</strong></p>
-        <ul>
-            <li>✅ Servidor Express funcionando</li>
-            <li>⏳ Conectar base de datos SQLite</li>
-            <li>⏳ Sistema de autenticación</li>
-            <li>⏳ API de rifas</li>
-        </ul>
-        <br>
-        <a href="/app">👉 Ver tu aplicación de rifas actual</a>
-    `);
-});
-
-// 7. Ruta para servir tu aplicación actual
-app.get('/app', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/rifa_app_62.html'));
 });
 
-// 8. Ruta de prueba para la API
+// Ruta de prueba
 app.get('/api/test', (req, res) => {
     res.json({ 
-        message: 'API funcionando correctamente!', 
-        timestamp: new Date().toISOString(),
-        status: 'success'
+        success: true, 
+        message: '🎯 Servidor de rifas funcionando correctamente!',
+        timestamp: new Date().toISOString()
     });
 });
 
-// 9. Nueva ruta para probar la base de datos
-app.get('/api/db-test', (req, res) => {
-    db.get("SELECT datetime('now') as fecha, COUNT(*) as total_users FROM users", (err, row) => {
-        if (err) {
-            res.status(500).json({ error: 'Error en la base de datos', details: err.message });
-        } else {
-            res.json({ 
-                message: 'Base de datos funcionando!', 
-                fecha: row.fecha,
-                usuarios_registrados: row.total_users,
-                status: 'success'
-            });
+// Middleware de manejo de errores
+app.use((err, req, res, next) => {
+    console.error('Error:', err.stack);
+    res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+    });
+});
+
+// Middleware para rutas no encontradas
+app.use('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Ruta no encontrada'
+    });
+});
+
+// Inicializar base de datos y servidor
+async function startServer() {
+    try {
+        console.log('🚀 Iniciando servidor...');
+        
+        // Inicializar base de datos
+        await database.init();
+        console.log('✅ Base de datos inicializada');
+        
+        // Verificar que JWT_SECRET esté configurado
+        if (!process.env.JWT_SECRET) {
+            console.error('❌ ERROR: JWT_SECRET no está configurado en .env');
+            process.exit(1);
         }
-    });
-});
+        
+        // Iniciar servidor
+        app.listen(PORT, () => {
+            console.log(`🎯 Servidor ejecutándose en http://localhost:${PORT}`);
+            console.log('📊 Endpoints disponibles:');
+            console.log('   GET  /                    - Aplicación web');
+            console.log('   GET  /api/test           - Prueba de servidor');
+            console.log('   POST /api/auth/register  - Registro de usuario');
+            console.log('   POST /api/auth/login     - Inicio de sesión');
+            console.log('   GET  /api/auth/me        - Usuario actual');
+            console.log('   POST /api/auth/logout    - Cerrar sesión');
+            console.log('🔐 Sistema de autenticación JWT configurado');
+        });
+        
+    } catch (error) {
+        console.error('❌ Error iniciando servidor:', error);
+        process.exit(1);
+    }
+}
 
-// 10. Iniciamos el servidor
-app.listen(PORT, () => {
-    console.log(`
-    🚀 ¡SERVIDOR CON BASE DE DATOS INICIADO!
-    
-    📍 URL: http://localhost:${PORT}
-    📱 Tu app: http://localhost:${PORT}/app
-    🔧 API test: http://localhost:${PORT}/api/test
-    🗺️ DB test: http://localhost:${PORT}/api/db-test
-    
-    💡 Para detener el servidor: Ctrl + C
-    💡 Para reiniciar: npm run dev
-    `);
-});
-
-// 11. Inicializar base de datos cuando arranca el servidor
-inicializarBaseDatos();
-setTimeout(() => {
-    probarConexion();
-}, 1000);
-
-// 12. Manejo de errores básico
-process.on('uncaughtException', (err) => {
-    console.error('Error no capturado:', err);
-    process.exit(1);
-});
+startServer();
