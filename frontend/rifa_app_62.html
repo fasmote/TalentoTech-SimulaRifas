@@ -371,6 +371,123 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        /* Media Queries para Responsive Design */
+        @media (max-width: 1024px) {
+            /* Tablet - Mantener dos columnas pero ajustar tamaños */
+            .main-content {
+                grid-template-columns: 1fr 280px;
+                gap: 20px;
+            }
+            
+            .numbers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+                gap: 6px;
+            }
+            
+            .number-cell {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Móvil - Una sola columna, números arriba */
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            /* Reordenar: números primero, carrito después */
+            .cart-section {
+                order: 2;
+                margin-top: 10px;
+            }
+            
+            .numbers-section {
+                order: 1;
+            }
+            
+            /* Grilla más grande en móviles */
+            .numbers-grid {
+                grid-template-columns: repeat(10, 1fr);
+                gap: 4px;
+                margin-bottom: 15px;
+            }
+            
+            .number-cell {
+                font-size: 0.9rem;
+                padding: 2px;
+            }
+            
+            /* Ajustar controles para móvil */
+            .controls {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            /* Carrito más compacto en móvil */
+            .cart-section {
+                padding: 20px;
+                max-height: 300px;
+            }
+            
+            .cart-items {
+                max-height: 150px;
+            }
+            
+            .cart-item {
+                padding: 6px;
+                margin-bottom: 3px;
+            }
+            
+            /* Título más pequeño en móvil */
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Móviles muy pequeños */
+            .container {
+                padding: 15px;
+            }
+            
+            .numbers-grid {
+                grid-template-columns: repeat(8, 1fr);
+                gap: 3px;
+            }
+            
+            .number-cell {
+                font-size: 0.8rem;
+                border-radius: 6px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                min-width: 100px;
+            }
+            
+            .cart-section {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>
