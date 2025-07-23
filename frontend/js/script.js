@@ -146,7 +146,7 @@ function generateUserRifasHTML() {
                 </div>
                 <span class="progress-text">${rifa.sold.length}/100 números seleccionados</span>
             </div>
-            <div class="rifa-price" style="color: #2196f3;">Creada por estudiante</div>
+            <div class="rifa-price" style="color: #2196f3;">Código: ${rifa.accessCode}</div>
             <button class="btn btn-primary" onclick="showRifaDetail('user_${rifa.id}')">Ver Simulación</button>
         </div>
     `).join('');
@@ -213,7 +213,8 @@ function showPerfilPage() {
                 <div class="create-rifa-form">
                     <input type="text" placeholder="Título del proyecto (ej: Mi Primera Rifa TT NODE.JS)" class="form-input" id="rifaTitle">
                     <textarea placeholder="Descripción de la simulación o premio" class="form-textarea" id="rifaDescription"></textarea>
-                    <input type="text" placeholder="Categoría (ej: Práctica, Proyecto, Ejercicio)" class="form-input" id="rifaPrice">
+                    <input type="text" placeholder="Código de acceso (ej: FIESTA2025, EVENTO123)" class="form-input" id="rifaAccessCode">
+                    <small style="color: #666; font-style: italic;">El código permite que otros usuarios se unan a tu simulación</small>
                     <button type="button" class="btn btn-success" onclick="createNewRifa()">Crear Simulación</button>
                 </div>
             </div>
@@ -302,9 +303,9 @@ function showDemoPage() {
 function showRifaDetail(rifaId) {
     // Datos predefinidos para las rifas de ejemplo
     const rifaData = {
-        'ps5': { name: 'PlayStation 5', price: 'Simulación educativa', sold: [12, 23, 45, 67, 89] },
-        'iphone': { name: 'iPhone 15 Pro', price: 'Demo Backend', sold: [5, 18, 34, 56, 78] },
-        'textiles': { name: 'Set de Toallas y Sábanas', price: 'Ejercicio práctico', sold: [3, 15, 27, 41, 58, 73, 86] }
+        'ps5': { name: 'PlayStation 5', accessCode: 'GAMING2025', sold: [12, 23, 45, 67, 89] },
+        'iphone': { name: 'iPhone 15 Pro', accessCode: 'BACKEND2025', sold: [5, 18, 34, 56, 78] },
+        'textiles': { name: 'Set de Toallas y Sábanas', accessCode: 'PRACTICA2025', sold: [3, 15, 27, 41, 58, 73, 86] }
     };
     
     let rifa;
@@ -316,7 +317,7 @@ function showRifaDetail(rifaId) {
         if (userRifa) {
             rifa = {
                 name: userRifa.title,
-                price: userRifa.price,
+                accessCode: userRifa.accessCode,
                 sold: userRifa.sold
             };
         }
@@ -333,7 +334,7 @@ function showRifaDetail(rifaId) {
     document.querySelector('.container').innerHTML = `
         <div class="page-header">
             <h1>🎯 ${rifa.name}</h1>
-            <p class="subtitle">Categoría: ${rifa.price}</p>
+            <p class="subtitle">Código de acceso: ${rifa.accessCode}</p>
         </div>
         
         <div class="rifa-detail-content">
@@ -347,7 +348,7 @@ function showRifaDetail(rifaId) {
             <div class="rifa-info">
                 <h3>Información de la Simulación</h3>
                 <p><strong>Proyecto:</strong> ${rifa.name}</p>
-                <p><strong>Tipo:</strong> ${rifa.price}</p>
+                <p><strong>Código:</strong> ${rifa.accessCode}</p>
                 <p><strong>Números simulados:</strong> ${rifa.sold.length}/100</p>
                 <p><strong>Curso:</strong> Talento Tech curso NODE.JS</p>
                 <button class="btn btn-primary" style="width: 100%; margin-top: 20px;">
@@ -602,9 +603,9 @@ function createNewRifa() {
     // Obtener elementos del formulario
     const titleElement = document.getElementById('rifaTitle');
     const descriptionElement = document.getElementById('rifaDescription');
-    const priceElement = document.getElementById('rifaPrice');
+    const accessCodeElement = document.getElementById('rifaAccessCode');
     
-    if (!titleElement || !descriptionElement || !priceElement) {
+    if (!titleElement || !descriptionElement || !accessCodeElement) {
         showNotification('Error: No se encontraron los campos del formulario', 'error');
         return;
     }
@@ -612,11 +613,17 @@ function createNewRifa() {
     // Obtener valores
     const title = titleElement.value.trim();
     const description = descriptionElement.value.trim();
-    const price = priceElement.value.trim();
+    const accessCode = accessCodeElement.value.trim();
     
     // Validar campos
-    if (!title || !description || !price) {
+    if (!title || !description || !accessCode) {
         showNotification('Por favor completa todos los campos', 'error');
+        return;
+    }
+    
+    // Verificar que el código de acceso no esté ya en uso
+    if (userRifas.some(rifa => rifa.accessCode === accessCode)) {
+        showNotification('Este código de acceso ya está en uso', 'error');
         return;
     }
     
@@ -625,7 +632,7 @@ function createNewRifa() {
         id: Date.now(), // ID único basado en timestamp
         title: title,
         description: description,
-        price: price,
+        accessCode: accessCode,
         sold: [], // Array de números vendidos (vacío inicialmente)
         created: new Date().toLocaleDateString('es-ES')
     };
@@ -636,7 +643,7 @@ function createNewRifa() {
     // Limpiar formulario
     titleElement.value = '';
     descriptionElement.value = '';
-    priceElement.value = '';
+    accessCodeElement.value = '';
     
     // Actualizar interfaz
     updateUserRifasList();
@@ -647,7 +654,7 @@ function createNewRifa() {
         statNumber.textContent = userRifas.length;
     }
     
-    showNotification(`¡Simulación "${title}" creada exitosamente!`);
+    showNotification(`¡Simulación "${title}" creada exitosamente! Código: ${accessCode}`);
 }
 
 /**
@@ -674,7 +681,7 @@ function updateUserRifasList() {
             </div>
             <p class="user-rifa-description">${rifa.description}</p>
             <div class="user-rifa-stats">
-                <span class="stat-item">📚 Categoría: ${rifa.price}</span>
+                <span class="stat-item">🔑 Código: ${rifa.accessCode}</span>
                 <span class="stat-item">📊 ${rifa.sold.length}/100 números</span>
             </div>
             <div class="user-rifa-actions">
@@ -700,14 +707,20 @@ function editRifa(rifaId) {
     const newDescription = prompt('Nueva descripción:', rifa.description);
     if (newDescription === null) return;
     
-    const newPrice = prompt('Nueva categoría:', rifa.price);
-    if (newPrice === null) return;
+    const newAccessCode = prompt('Nuevo código de acceso:', rifa.accessCode);
+    if (newAccessCode === null) return;
     
     // Actualizar si se proporcionaron todos los valores
-    if (newTitle && newDescription && newPrice) {
+    if (newTitle && newDescription && newAccessCode) {
+        // Verificar que el nuevo código no esté en uso por otra rifa
+        if (newAccessCode !== rifa.accessCode && userRifas.some(r => r.accessCode === newAccessCode)) {
+            showNotification('Este código de acceso ya está en uso', 'error');
+            return;
+        }
+        
         rifa.title = newTitle;
         rifa.description = newDescription;
-        rifa.price = newPrice;
+        rifa.accessCode = newAccessCode;
         updateUserRifasList();
         showNotification('Simulación actualizada exitosamente!');
     }

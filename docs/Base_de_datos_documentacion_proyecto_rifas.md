@@ -5,7 +5,7 @@
 **Institución:** Talento Tech - Curso Node.js  
 **Tecnología:** Node.js + Express + SQLite  
 **Fecha:** Julio 2025  
-**Versión:** 1.0  
+**Versión:** 1.1  
 **Estudiante:** [Nombre del Estudiante]
 
 ---
@@ -15,7 +15,7 @@
 Desarrollar una aplicación web completa usando Node.js como parte del programa **Talento Tech - Curso Node.js**, agregando funcionalidad de autenticación y persistencia de datos al simulador de rifas existente, permitiendo que los usuarios puedan:
 
 - **Usuarios no logueados**: Usar la simulación como actualmente (modo demo)
-- **Usuarios logueados**: Crear, guardar y gestionar sus propias simulaciones de rifas
+- **Usuarios logueados**: Crear, guardar y gestionar sus propias simulaciones de rifas con códigos de acceso compartibles
 - **Aprendizaje práctico**: Implementar conceptos de backend, bases de datos y APIs REST
 
 ---
@@ -125,7 +125,7 @@ CREATE TABLE rifas (
     user_id INTEGER NOT NULL,
     title VARCHAR(200) NOT NULL,
     description TEXT,
-    price_per_number DECIMAL(10,2),
+    access_code VARCHAR(20) UNIQUE NOT NULL,
     max_numbers INTEGER DEFAULT 100,
     status VARCHAR(20) DEFAULT 'active',
     winner_number INTEGER,
@@ -203,10 +203,10 @@ INSERT OR IGNORE INTO users (username, email, password_hash, full_name) VALUES
 ('demo_user', 'demo@talentotech.com', '$2b$10$ejemplo_hash_demo', 'Usuario Demo');
 
 -- Insertar rifas de ejemplo
-INSERT OR IGNORE INTO rifas (user_id, title, description, price_per_number, status) VALUES
-(1, 'PlayStation 5 - Proyecto Final', 'Rifa de práctica para el curso Node.js', 25.00, 'active'),
-(1, 'iPhone 15 Pro - Ejercicio Backend', 'Simulación con base de datos SQLite', 50.00, 'active'),
-(2, 'Set de Productos - Demo', 'Ejemplo de CRUD completo', 15.00, 'completed');
+INSERT OR IGNORE INTO rifas (user_id, title, description, access_code, status) VALUES
+(1, 'PlayStation 5 - Proyecto Final', 'Rifa de práctica para el curso Node.js', 'GAMING2025', 'active'),
+(1, 'iPhone 15 Pro - Ejercicio Backend', 'Simulación con base de datos SQLite', 'BACKEND2025', 'active'),
+(2, 'Set de Productos - Demo', 'Ejemplo de CRUD completo', 'DEMO2025', 'completed');
 ```
 
 ---
@@ -232,6 +232,7 @@ INSERT OR IGNORE INTO rifas (user_id, title, description, price_per_number, stat
 | PUT | `/api/rifas/:id` | Actualizar rifa | Parámetros de ruta |
 | DELETE | `/api/rifas/:id` | Eliminar rifa | Soft delete |
 | GET | `/api/rifas/:id` | Detalle de rifa | Joins con SQLite |
+| GET | `/api/rifas/code/:accessCode` | Buscar por código | Búsqueda por código de acceso |
 
 ### 5.3 Módulo de Participación
 

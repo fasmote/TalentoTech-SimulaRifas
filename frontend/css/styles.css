@@ -32,9 +32,10 @@ body {
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    justify-content: space-between; /* Distribuye espacio entre elementos */
+    justify-content: center; /* Centra los elementos */
     align-items: center;
     height: 70px;
+    gap: 50px; /* Espacio entre logo y navegación */
 }
 
 /* ===== LOGO DE LA APLICACIÓN ===== */
@@ -686,6 +687,11 @@ h1 {
 /* ===== MEDIA QUERIES PARA RESPONSIVIDAD ===== */
 /* Pantallas tablet y menores */
 @media (max-width: 768px) {
+    /* Navegación responsive para móvil */
+    .nav-container {
+        justify-content: space-between; /* En móvil vuelve al layout original */
+    }
+    
     /* Navegación móvil */
     .nav-links {
         display: none; /* Oculto por defecto */
