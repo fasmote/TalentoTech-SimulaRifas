@@ -174,9 +174,9 @@ El proyecto incluye un script de pruebas automatizado que verifica:
 
 ## 👨‍💻 Desarrollador
 
-**[Tu Nombre]**  
+**Claudio Roh**  
 Talento Tech curso NODE.JS 2025  
-Instructor: [Nombre del instructor]
+Instructor: Jean Paul Ferreira
 
 ## 📄 Licencia
 
