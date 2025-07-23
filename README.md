@@ -1,6 +1,6 @@
 # 🎲 Simulador de Rifas con Backend
 
-**Proyecto Final - IFTS11 Desarrollo Web 2025**
+**Proyecto Final - Talento Tech curso NODE.JS 2025**
 
 Un simulador interactivo de rifas con autenticación de usuarios y base de datos, desarrollado con Node.js, Express y SQLite.
 
@@ -175,12 +175,12 @@ El proyecto incluye un script de pruebas automatizado que verifica:
 ## 👨‍💻 Desarrollador
 
 **[Tu Nombre]**  
-IFTS11 - Desarrollo Web 2025  
-Profesor: [Nombre del profesor]
+Talento Tech curso NODE.JS 2025  
+Instructor: [Nombre del instructor]
 
 ## 📄 Licencia
 
-Este proyecto es parte de un trabajo académico para IFTS11.
+Este proyecto es parte del programa educativo Talento Tech curso NODE.JS.
 
 ---
 
