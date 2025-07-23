@@ -1,15 +1,15 @@
 {
-  "name": "rifa-app-backend",
+  "name": "rifas-talento-tech-backend",
   "version": "1.0.0",
-  "description": "Sistema de rifas con autenticación de usuarios",
+  "description": "Sistema de rifas con backend Node.js - Proyecto Talento Tech curso NODE.JS",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "node test/test-auth.js"
   },
-  "keywords": ["rifas", "sorteos", "nodejs", "express", "sqlite"],
-  "author": "Tu Nombre",
+  "keywords": ["rifas", "sorteos", "nodejs", "express", "sqlite", "talento-tech", "backend"],
+  "author": "Estudiante Talento Tech curso NODE.JS",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
