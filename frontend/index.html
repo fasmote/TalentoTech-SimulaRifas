@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Rifas - Talento Tech curso NODE.JS</title>
+    <title>SimulaRifa TT - Simulador de Rifas</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -13,23 +13,27 @@
             <!-- Logo de la aplicación -->
             <a href="#" class="logo">🎲 SimulaRifa TT</a>
             
-            <!-- Enlaces de navegación -->
-            <ul class="nav-links" id="navLinks">
-                <li><a href="#" class="active" onclick="navigateTo('demo')">Inicio</a></li>
-                <li><a href="#" onclick="navigateTo('rifas')">Simulaciones Públicas</a></li>
-                <li><a href="#" onclick="navigateTo('perfil')">Mi Perfil</a></li>
-            </ul>
+            <!-- Campo de código de acceso (centro) -->
+            <div class="access-code-section">
+                <span class="code-label">🔑 Código:</span>
+                <input type="text" class="code-input" id="accessCodeInput" placeholder="XXXXXX" maxlength="20">
+                <button class="btn btn-info btn-small" onclick="accessByCode()">ACCEDER</button>
+            </div>
             
             <!-- Sección de usuario logueado -->
             <div class="user-section" id="userSection" style="display: none; align-items: center; gap: 15px;">
+                <div class="user-nav">
+                    <a href="#" onclick="navigateTo('rifas')" class="nav-link">Mis Rifas Simuladas</a>
+                    <a href="#" onclick="navigateTo('demo')" class="nav-link active">Demo</a>
+                </div>
                 <span id="userName" style="color: #667eea; font-weight: 500;"></span>
-                <button class="btn btn-primary" onclick="logout()" style="padding: 8px 16px; font-size: 0.9rem;">CERRAR SESIÓN</button>
+                <button class="btn btn-danger btn-small" onclick="logout()">SALIR</button>
             </div>
             
             <!-- Sección de usuario no logueado -->
             <div class="login-section" id="loginSection" style="display: flex; align-items: center; gap: 15px;">
-                <button class="btn btn-success" onclick="showLoginModal()" style="padding: 8px 16px; font-size: 0.9rem;">INICIAR SESIÓN</button>
-                <button class="btn btn-secondary" onclick="showRegisterModal()" style="padding: 8px 16px; font-size: 0.9rem;">REGISTRARSE</button>
+                <button class="btn btn-outline btn-small" onclick="showLoginModal()">INICIAR SESIÓN</button>
+                <button class="btn btn-primary btn-small" onclick="showRegisterModal()">REGISTRARSE</button>
             </div>
             
             <!-- Botón para menú móvil -->
@@ -38,57 +42,114 @@
     </nav>
 
     <!-- ===== CONTENEDOR PRINCIPAL ===== -->
-    <div class="container">
-        <!-- Header con título y descripción -->
-        <header>
-            <h1>🎲 Simulador de Rifas</h1>
-            <p class="subtitle">Proyecto desarrollado en Talento Tech curso NODE.JS</p>
-        </header>
+    <div class="container" id="mainContainer">
+        <!-- ===== VISTA PARA USUARIOS NO LOGUEADOS ===== -->
+        <div class="logged-out-view">
+            <!-- Header con título y descripción -->
+            <header class="page-header">
+                <h1>🎲 Simulador de Rifas</h1>
+                <p class="subtitle">¡Prueba la simulación! Selecciona números y haz un sorteo de prueba</p>
+            </header>
 
-        <!-- Contenido principal dividido en dos columnas -->
-        <div class="main-content">
-            <!-- ===== SECCIÓN DE NÚMEROS DE LA RIFA ===== -->
-            <div class="numbers-section">
-                <!-- Controles de acción -->
-                <div class="controls">
-                    <button class="btn btn-secondary" onclick="selectRandomNumber()">
-                        🎯 Elegir al Azar
-                    </button>
-                    <button class="btn btn-primary" onclick="clearSelection()">
-                        🗑️ Limpiar Todo
-                    </button>
-                    <button class="btn btn-success" onclick="drawWinner()">
-                        🏆 Sortear Ganador
-                    </button>
-                </div>
-                
-                <!-- Grid de números (generado dinámicamente) -->
-                <div class="numbers-grid" id="numbersGrid">
-                    <!-- Los números se generan con JavaScript -->
-                </div>
-            </div>
-
-            <!-- ===== SECCIÓN DEL CARRITO/SIDEBAR ===== -->
-            <div class="cart-section">
-                <!-- Header del carrito -->
-                <div class="cart-header">
-                    <span class="cart-icon">🛒</span>
-                    <h3 class="cart-title">Mis Números</h3>
-                    <div class="cart-count" id="cartCount">0</div>
-                </div>
-                
-                <!-- Lista de números seleccionados -->
-                <div class="cart-items" id="cartItems">
-                    <div class="empty-cart">
-                        No has seleccionado números aún
+            <!-- Simulaciones públicas (aparece arriba en desktop, abajo en móvil) -->
+            <div class="public-rifas-section">
+                <h3 class="section-title">🎊 Simulaciones Públicas de Ejemplo</h3>
+                <div class="rifas-grid">
+                    <div class="rifa-card">
+                        <div class="rifa-icon">🎮</div>
+                        <h4>PlayStation 5</h4>
+                        <p class="rifa-description">Simulación de ejemplo para evento gaming</p>
+                        <div class="rifa-stats">
+                            <span class="stat-item">🔑 Código: <strong>GAMING2025</strong></span>
+                            <span class="stat-item">👥 Participantes: 15/100</span>
+                        </div>
+                        <button class="btn btn-info" onclick="accessByCode('GAMING2025')">🎯 PARTICIPAR</button>
+                    </div>
+                    
+                    <div class="rifa-card">
+                        <div class="rifa-icon">📱</div>
+                        <h4>iPhone 15 Pro</h4>
+                        <p class="rifa-description">Simulación de ejemplo para evento corporativo</p>
+                        <div class="rifa-stats">
+                            <span class="stat-item">🔑 Código: <strong>CORP2025</strong></span>
+                            <span class="stat-item">👥 Participantes: 8/100</span>
+                        </div>
+                        <button class="btn btn-info" onclick="accessByCode('CORP2025')">🎯 PARTICIPAR</button>
+                    </div>
+                    
+                    <div class="rifa-card">
+                        <div class="rifa-icon">🎁</div>
+                        <h4>Pack de Productos</h4>
+                        <p class="rifa-description">Simulación de ejemplo para evento familiar</p>
+                        <div class="rifa-stats">
+                            <span class="stat-item">🔑 Código: <strong>FAMILY2025</strong></span>
+                            <span class="stat-item">👥 Participantes: 22/100</span>
+                        </div>
+                        <button class="btn btn-info" onclick="accessByCode('FAMILY2025')">🎯 PARTICIPAR</button>
                     </div>
                 </div>
-                
-                <!-- Botón principal de acción -->
-                <button class="btn btn-primary" style="width: 100%;" onclick="drawWinner()">
-                    🎊 ¡Simular Sorteo!
-                </button>
             </div>
+
+            <!-- Contenido principal - Grilla y carrito -->
+            <div class="main-content">
+                <!-- ===== SECCIÓN DE NÚMEROS DE LA RIFA ===== -->
+                <div class="numbers-section">
+                    <h3 class="section-title">🎯 Grilla de Prueba</h3>
+                    
+                    <!-- Controles de acción -->
+                    <div class="controls">
+                        <button class="btn btn-secondary" onclick="selectRandomNumber()">
+                            🎯 ELEGIR AL AZAR
+                        </button>
+                        <button class="btn btn-primary" onclick="clearSelection()">
+                            🗑️ LIMPIAR TODO
+                        </button>
+                        <button class="btn btn-success" onclick="drawWinner()">
+                            🏆 SORTEAR GANADOR
+                        </button>
+                    </div>
+                    
+                    <!-- Grid de números (generado dinámicamente) -->
+                    <div class="numbers-grid" id="numbersGrid">
+                        <!-- Los números se generan con JavaScript -->
+                    </div>
+                </div>
+
+                <!-- ===== SECCIÓN DEL CARRITO/SIDEBAR ===== -->
+                <div class="cart-section">
+                    <!-- Header del carrito -->
+                    <div class="cart-header">
+                        <span class="cart-icon">🎯</span>
+                        <h3 class="cart-title">Números Seleccionados</h3>
+                        <div class="cart-count" id="cartCount">0</div>
+                    </div>
+                    
+                    <!-- Lista de números seleccionados -->
+                    <div class="cart-items" id="cartItems">
+                        <div class="empty-cart">
+                            Selecciona números en la grilla
+                        </div>
+                    </div>
+                    
+                    <!-- Botón principal de acción -->
+                    <button class="btn btn-primary" style="width: 100%;" onclick="drawWinner()">
+                        🎊 ¡Sortear Demo!
+                    </button>
+                    
+                    <!-- Incentivo para registrarse -->
+                    <div class="register-incentive">
+                        <p>¿Quieres crear tus propias simulaciones?</p>
+                        <button class="btn btn-secondary btn-small" onclick="showRegisterModal()">
+                            ➕ Crear Cuenta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VISTA PARA USUARIOS LOGUEADOS ===== -->
+        <div class="logged-in-view" id="loggedInContent" style="display: none;">
+            <!-- Se carga dinámicamente -->
         </div>
     </div>
 
@@ -148,6 +209,30 @@
             <button class="btn btn-secondary" onclick="closeAuthModal()" style="width: 100%;">
                 Cancelar
             </button>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE ACCESO POR CÓDIGO ===== -->
+    <div class="code-access-modal" id="codeAccessModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="rifaTitle">Accediendo a simulación...</h3>
+                <button class="close-btn" onclick="closeCodeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="rifa-info" id="rifaInfo">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div class="numbers-participation-grid" id="participationGrid">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div class="participation-controls">
+                    <input type="text" placeholder="Tu nombre" id="participantName" class="form-input">
+                    <button class="btn btn-primary" onclick="confirmParticipation()">
+                        🎯 Confirmar Selección
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -55,28 +55,37 @@
             gap: 20px;
         }
 
-        .access-code-group {
+        .access-code-section {
             display: flex;
             align-items: center;
             gap: 10px;
+            background: rgba(255,255,255,0.8);
+            padding: 8px 15px;
+            border-radius: 25px;
+            border: 2px solid #e9ecef;
         }
 
-        .code-input-nav {
-            padding: 8px 12px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
+        .code-input {
+            border: none;
+            background: transparent;
             font-size: 0.9rem;
-            text-align: center;
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-weight: bold;
-            width: 140px;
+            width: 120px;
+            text-align: center;
+            outline: none;
+        }
+
+        .code-input::placeholder {
+            color: #999;
+            font-weight: normal;
         }
 
         .nav-links {
             display: flex;
             list-style: none;
-            gap: 20px;
+            gap: 15px;
             margin: 0;
             padding: 0;
         }
@@ -212,7 +221,7 @@
 
         .numbers-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            grid-template-columns: repeat(10, 1fr);
             gap: 6px;
             margin-bottom: 20px;
         }
@@ -357,7 +366,61 @@
             padding: 20px;
         }
 
-        /* Formularios y cards para usuario logueado */
+        /* Simulaciones públicas para no logueados */
+        .public-rifas-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .rifas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .rifa-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #4caf50;
+            transition: transform 0.3s ease;
+        }
+
+        .rifa-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .rifa-card h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .rifa-description {
+            color: #666;
+            font-style: italic;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .rifa-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            font-size: 0.8rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Formularios para usuario logueado */
         .form-card, .profile-section {
             background: white;
             border-radius: 15px;
@@ -399,7 +462,7 @@
             min-height: 100px;
         }
 
-        /* Lista de rifas creadas */
+        /* Lista de rifas del usuario */
         .user-rifa-card {
             background: #f8f9fa;
             border-radius: 10px;
@@ -440,14 +503,6 @@
             gap: 20px;
             margin-bottom: 15px;
             flex-wrap: wrap;
-        }
-
-        .stat-item {
-            font-size: 0.9rem;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .user-rifa-actions {
@@ -554,17 +609,18 @@
                 margin-top: 15px;
             }
 
-            .access-code-group {
+            .access-code-section {
                 flex-direction: column;
                 gap: 8px;
+                padding: 12px;
             }
 
-            .code-input-nav {
+            .code-input {
                 width: 100%;
             }
 
             body {
-                padding-top: 140px;
+                padding-top: 120px;
             }
 
             .demo-panel {
@@ -583,6 +639,10 @@
 
             .controls {
                 justify-content: center;
+            }
+
+            .rifas-grid {
+                grid-template-columns: 1fr;
             }
 
             .user-rifa-header {
@@ -609,10 +669,11 @@
             <a href="#" class="logo">🎲 SimulaRifa TT</a>
             
             <div class="nav-center">
-                <!-- Campo de código de acceso -->
-                <div class="access-code-group">
-                    <input type="text" class="code-input-nav" id="accessCodeInput" placeholder="Código de acceso" maxlength="20">
-                    <button class="btn btn-info btn-small" onclick="accessByCode()">🎯 Acceder</button>
+                <!-- Campo de código de acceso más prominente -->
+                <div class="access-code-section">
+                    <span style="font-size: 0.8rem; color: #666;">🔑 Código:</span>
+                    <input type="text" class="code-input" id="accessCodeInput" placeholder="XXXXXX" maxlength="20">
+                    <button class="btn btn-info btn-small" onclick="accessByCode()">Acceder</button>
                 </div>
             </div>
 
@@ -626,7 +687,7 @@
                 <!-- Info de usuario logueado -->
                 <div class="user-info logged-in-view">
                     <nav class="nav-links">
-                        <a href="#" onclick="showMyRifas()" class="nav-link">Mis Simulaciones</a>
+                        <a href="#" onclick="showMyRifas()" class="nav-link">Mis Rifas Simuladas</a>
                         <a href="#" onclick="showDemo()" class="nav-link active">Demo</a>
                     </nav>
                     <span class="user-name" id="userName">Usuario</span>
@@ -637,15 +698,52 @@
     </nav>
 
     <div class="container" id="mainContainer">
-        <!-- Vista para usuarios NO logueados (Demo) -->
+        <!-- Vista para usuarios NO logueados (Demo + Simulaciones Públicas) -->
         <div class="logged-out-view">
             <div class="page-header">
                 <h1>🎲 Simulador de Rifas</h1>
                 <p class="subtitle">¡Prueba la simulación! Selecciona números y haz un sorteo de prueba</p>
             </div>
 
+            <!-- Simulaciones públicas hardcodeadas -->
+            <div class="public-rifas-section">
+                <h3 style="color: #333; margin-bottom: 20px;">🎊 Simulaciones Públicas de Ejemplo</h3>
+                <div class="rifas-grid">
+                    <div class="rifa-card">
+                        <h4>🎮 PlayStation 5</h4>
+                        <p class="rifa-description">Simulación de ejemplo para evento gaming</p>
+                        <div class="rifa-stats">
+                            <span class="stat-item">🔑 Código: <strong>GAMING2025</strong></span>
+                            <span class="stat-item">👥 Participantes: 15/100</span>
+                        </div>
+                        <button class="btn btn-info btn-small" onclick="accessByCode('GAMING2025')">🎯 Participar</button>
+                    </div>
+                    
+                    <div class="rifa-card">
+                        <h4>📱 iPhone 15 Pro</h4>
+                        <p class="rifa-description">Simulación de ejemplo para evento corporativo</p>
+                        <div class="rifa-stats">
+                            <span class="stat-item">🔑 Código: <strong>CORP2025</strong></span>
+                            <span class="stat-item">👥 Participantes: 8/100</span>
+                        </div>
+                        <button class="btn btn-info btn-small" onclick="accessByCode('CORP2025')">🎯 Participar</button>
+                    </div>
+                    
+                    <div class="rifa-card">
+                        <h4>🎁 Pack de Productos</h4>
+                        <p class="rifa-description">Simulación de ejemplo para evento familiar</p>
+                        <div class="rifa-stats">
+                            <span class="stat-item">🔑 Código: <strong>FAMILY2025</strong></span>
+                            <span class="stat-item">👥 Participantes: 22/100</span>
+                        </div>
+                        <button class="btn btn-info btn-small" onclick="accessByCode('FAMILY2025')">🎯 Participar</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="demo-panel">
                 <div class="numbers-section">
+                    <h3 style="color: #333; margin-bottom: 15px;">🎯 Prueba la Funcionalidad</h3>
                     <div class="controls">
                         <button class="btn btn-secondary" onclick="selectRandomNumber()">
                             🎯 Elegir al Azar
@@ -704,34 +802,50 @@
         let currentUser = null;
         let selectedNumbers = [];
         let winnerNumber = null;
-        let userRifas = [];
+        let userRifas = []; // IMPORTANTE: Cada usuario tiene sus propias rifas
         let currentView = 'demo';
 
-        // Datos de ejemplo para usuario logueado
-        const exampleRifas = [
+        // Simulaciones públicas hardcodeadas (solo para no-logueados)
+        const publicRifas = [
             {
-                id: 3,
-                title: 'Celu iPhone XX',
-                description: 'Terrible celular para evento gaming',
-                accessCode: 'IPHONE2025',
+                id: 'public_1',
+                title: '🎮 PlayStation 5',
+                description: 'Simulación de ejemplo para evento gaming',
+                accessCode: 'GAMING2025',
                 status: 'active',
-                created: '24/7/2025',
                 numbers: {
-                    15: { participant: 'Juan', selected_at: '2025-07-24 10:30' },
-                    23: { participant: 'María', selected_at: '2025-07-24 11:15' },
-                    67: { participant: 'Carlos', selected_at: '2025-07-24 12:00' }
+                    5: { participant: 'Gamer123', selected_at: '2025-07-22 14:30' },
+                    12: { participant: 'PlayerOne', selected_at: '2025-07-22 15:45' },
+                    23: { participant: 'ProGamer', selected_at: '2025-07-23 09:15' },
+                    34: { participant: 'GameMaster', selected_at: '2025-07-23 11:20' },
+                    45: { participant: 'ElitePlayer', selected_at: '2025-07-23 16:30' }
                 }
             },
             {
-                id: 1,
-                title: 'Celu POCO',
-                description: 'Mucho POCO!! 256 GB ram',
-                accessCode: 'POCO2025',
+                id: 'public_2',
+                title: '📱 iPhone 15 Pro',
+                description: 'Simulación de ejemplo para evento corporativo',
+                accessCode: 'CORP2025',
                 status: 'active',
-                created: '23/7/2025',
                 numbers: {
-                    5: { participant: 'Ana', selected_at: '2025-07-23 14:20' },
-                    42: { participant: 'Pedro', selected_at: '2025-07-23 15:45' }
+                    8: { participant: 'CorpUser1', selected_at: '2025-07-23 10:00' },
+                    17: { participant: 'Employee2', selected_at: '2025-07-23 14:15' },
+                    29: { participant: 'TeamLead', selected_at: '2025-07-24 09:30' }
+                }
+            },
+            {
+                id: 'public_3',
+                title: '🎁 Pack de Productos',
+                description: 'Simulación de ejemplo para evento familiar',
+                accessCode: 'FAMILY2025',
+                status: 'active',
+                numbers: {
+                    3: { participant: 'Familia1', selected_at: '2025-07-22 18:00' },
+                    11: { participant: 'Papa2', selected_at: '2025-07-22 19:15' },
+                    19: { participant: 'Mama3', selected_at: '2025-07-23 08:45' },
+                    27: { participant: 'Hijo4', selected_at: '2025-07-23 12:30' },
+                    35: { participant: 'Tia5', selected_at: '2025-07-23 17:20' },
+                    42: { participant: 'Primo6', selected_at: '2025-07-24 10:15' }
                 }
             }
         ];
@@ -776,10 +890,12 @@
                 return;
             }
 
-            // Simulación de login exitoso
+            // Simulación de login exitoso - IMPORTANTE: Rifas aisladas por usuario
             isLoggedIn = true;
-            currentUser = { id: 1, name: user, email: `${user}@demo.com` };
-            userRifas = [...exampleRifas]; // Copiar datos de ejemplo
+            currentUser = { id: user, name: user, email: `${user}@demo.com` };
+            
+            // CADA USUARIO TIENE SUS PROPIAS RIFAS (aislamiento de datos)
+            userRifas = getUserRifasFromStorage(currentUser.id);
             
             document.body.classList.add('is-logged-in');
             document.getElementById('userName').textContent = currentUser.name;
@@ -800,10 +916,12 @@
                 return;
             }
 
-            // Simulación de registro exitoso
+            // Simulación de registro exitoso - IMPORTANTE: Usuario nuevo empieza sin rifas
             isLoggedIn = true;
-            currentUser = { id: 2, name: name, email: email };
-            userRifas = []; // Usuario nuevo sin rifas
+            currentUser = { id: user, name: name, email: email };
+            
+            // Usuario nuevo - NO rifas preexistentes
+            userRifas = [];
             
             document.body.classList.add('is-logged-in');
             document.getElementById('userName').textContent = currentUser.name;
@@ -815,6 +933,9 @@
 
         function logout() {
             if (confirm('¿Seguro que quieres cerrar sesión?')) {
+                // Guardar rifas del usuario antes de limpiar
+                saveUserRifasToStorage(currentUser.id, userRifas);
+                
                 isLoggedIn = false;
                 currentUser = null;
                 userRifas = [];
@@ -826,13 +947,21 @@
             }
         }
 
+        // Funciones para simular almacenamiento por usuario (en app real sería backend)
+        function getUserRifasFromStorage(userId) {
+            const saved = localStorage.getItem(`rifas_${userId}`);
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveUserRifasToStorage(userId, rifas) {
+            localStorage.setItem(`rifas_${userId}`, JSON.stringify(rifas));
+        }
+
         // Navegación entre vistas
         function showDemo() {
             currentView = 'demo';
             updateActiveNav('demo');
-            // La vista demo siempre está visible cuando no está logueado
             if (isLoggedIn) {
-                // Si está logueado, mostrar una versión expandida del demo
                 showLoggedInDemo();
             }
         }
@@ -845,8 +974,8 @@
             
             document.getElementById('loggedInContent').innerHTML = `
                 <div class="page-header">
-                    <h1>👤 Mis Simulaciones</h1>
-                    <p class="subtitle">Gestiona tus simulaciones de rifas</p>
+                    <h1>🎯 Mis Rifas Simuladas</h1>
+                    <p class="subtitle">Gestiona tus simulaciones personales</p>
                 </div>
 
                 <!-- Crear nueva simulación -->
@@ -865,7 +994,7 @@
 
                 <!-- Lista de simulaciones creadas -->
                 <div class="profile-section">
-                    <h3>🎯 Mis Simulaciones Creadas (${userRifas.length})</h3>
+                    <h3>🎯 Mis Simulaciones (${userRifas.length})</h3>
                     <div id="userRifasList">
                         ${generateUserRifasHTML()}
                     </div>
@@ -876,12 +1005,13 @@
         function showLoggedInDemo() {
             document.getElementById('loggedInContent').innerHTML = `
                 <div class="page-header">
-                    <h1>🎲 Demo Avanzado</h1>
+                    <h1>🎲 Demo Interactivo</h1>
                     <p class="subtitle">Prueba todas las funcionalidades con datos de ejemplo</p>
                 </div>
                 
                 <div class="demo-panel">
                     <div class="numbers-section">
+                        <h3 style="color: #333; margin-bottom: 15px;">🎯 Grilla de Prueba</h3>
                         <div class="controls">
                             <button class="btn btn-secondary" onclick="selectRandomNumber()">🎯 Elegir al Azar</button>
                             <button class="btn btn-primary" onclick="clearSelection()">🗑️ Limpiar Todo</button>
@@ -896,15 +1026,19 @@
                     <div class="side-panel">
                         <div class="panel-header">
                             <span class="panel-icon">🎯</span>
-                            <h3 class="panel-title">Demo Interactivo</h3>
+                            <h3 class="panel-title">Demo Avanzado</h3>
                         </div>
                         
                         <div style="margin-bottom: 20px;">
-                            <button class="btn btn-info" style="width: 100%; margin-bottom: 10px;" onclick="accessByCode('IPHONE2025')">
-                                📱 Probar: IPHONE2025
+                            <h4 style="color: #333; margin-bottom: 10px;">Prueba códigos públicos:</h4>
+                            <button class="btn btn-info btn-small" style="width: 100%; margin-bottom: 8px;" onclick="accessByCode('GAMING2025')">
+                                🎮 GAMING2025
                             </button>
-                            <button class="btn btn-info" style="width: 100%; margin-bottom: 10px;" onclick="accessByCode('POCO2025')">
-                                📱 Probar: POCO2025
+                            <button class="btn btn-info btn-small" style="width: 100%; margin-bottom: 8px;" onclick="accessByCode('CORP2025')">
+                                📱 CORP2025
+                            </button>
+                            <button class="btn btn-info btn-small" style="width: 100%; margin-bottom: 15px;" onclick="accessByCode('FAMILY2025')">
+                                🎁 FAMILY2025
                             </button>
                         </div>
                         
@@ -1062,7 +1196,7 @@
         // Funciones para gestión de rifas (usuario logueado)
         function generateUserRifasHTML() {
             if (userRifas.length === 0) {
-                return '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna simulación aún</p>';
+                return '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna simulación aún. ¡Empieza creando tu primera simulación!</p>';
             }
 
             return userRifas.map(rifa => {
@@ -1106,8 +1240,9 @@
                 return;
             }
 
+            // Verificar que el código no exista en las rifas del usuario actual
             if (userRifas.some(r => r.accessCode === accessCode)) {
-                showNotification('El código de acceso ya existe', 'error');
+                showNotification('Ya tienes una simulación con ese código', 'error');
                 return;
             }
 
@@ -1118,10 +1253,12 @@
                 accessCode: accessCode,
                 status: 'active',
                 created: new Date().toLocaleDateString('es-ES'),
-                numbers: {}
+                numbers: {},
+                owner: currentUser.id // IMPORTANTE: Marcar propietario
             };
 
             userRifas.push(newRifa);
+            saveUserRifasToStorage(currentUser.id, userRifas); // Guardar inmediatamente
 
             // Limpiar formulario
             document.getElementById('rifaTitle').value = '';
@@ -1130,7 +1267,7 @@
 
             // Actualizar lista
             document.getElementById('userRifasList').innerHTML = generateUserRifasHTML();
-            document.querySelector('.profile-section h3').textContent = `🎯 Mis Simulaciones Creadas (${userRifas.length})`;
+            document.querySelector('.profile-section h3').textContent = `🎯 Mis Simulaciones (${userRifas.length})`;
 
             showNotification(`¡Simulación "${title}" creada! Código: ${accessCode}`);
         }
@@ -1157,6 +1294,7 @@
             rifa.title = newTitle.trim();
             rifa.description = newDescription.trim();
 
+            saveUserRifasToStorage(currentUser.id, userRifas);
             document.getElementById('userRifasList').innerHTML = generateUserRifasHTML();
             showNotification('Simulación actualizada correctamente');
         }
@@ -1166,8 +1304,9 @@
 
             userRifas = userRifas.filter(r => r.id !== rifaId);
             
+            saveUserRifasToStorage(currentUser.id, userRifas);
             document.getElementById('userRifasList').innerHTML = generateUserRifasHTML();
-            document.querySelector('.profile-section h3').textContent = `🎯 Mis Simulaciones Creadas (${userRifas.length})`;
+            document.querySelector('.profile-section h3').textContent = `🎯 Mis Simulaciones (${userRifas.length})`;
             
             showNotification('Simulación eliminada correctamente');
         }
@@ -1272,6 +1411,7 @@
 
             rifa.status = 'completed';
             rifa.winner = { number: parseInt(winnerNumber), participant: winnerData.participant };
+            saveUserRifasToStorage(currentUser.id, userRifas);
         }
 
         // Función para acceder por código
@@ -1282,9 +1422,15 @@
                 return;
             }
 
-            // Buscar en todas las rifas disponibles (incluye ejemplos)
-            const allRifas = isLoggedIn ? userRifas : exampleRifas;
-            const rifa = allRifas.find(r => r.accessCode === inputCode);
+            let rifa = null;
+            
+            // Buscar primero en simulaciones públicas
+            rifa = publicRifas.find(r => r.accessCode === inputCode);
+            
+            // Si no se encuentra y el usuario está logueado, buscar en sus rifas
+            if (!rifa && isLoggedIn) {
+                rifa = userRifas.find(r => r.accessCode === inputCode);
+            }
             
             if (!rifa) {
                 showNotification('Código de acceso no válido', 'error');
@@ -1307,7 +1453,7 @@
                     <div style="text-align: center; margin-bottom: 20px;">
                         <p style="color: #666; margin-bottom: 10px;">Participantes: ${Object.keys(rifa.numbers).length}/100</p>
                         <input type="text" placeholder="Tu nombre" id="participantName" class="form-input" style="max-width: 300px; margin-right: 10px;">
-                        <button class="btn btn-primary" onclick="selectNumbers(${rifa.id})">🎯 Confirmar Selección</button>
+                        <button class="btn btn-primary" onclick="selectNumbers('${rifa.id}')">🎯 Confirmar Selección</button>
                     </div>
                 </div>
             `);
@@ -1315,7 +1461,6 @@
 
         function generateParticipationGrid(takenNumbers) {
             let html = '';
-            let tempSelectedNumbers = [];
             
             for (let i = 0; i <= 99; i++) {
                 const numberStr = i.toString().padStart(2, '0');
@@ -1367,8 +1512,12 @@
                 return;
             }
 
-            const allRifas = isLoggedIn ? userRifas : exampleRifas;
-            const rifa = allRifas.find(r => r.id === rifaId);
+            // Buscar la rifa (puede ser pública o del usuario)
+            let rifa = publicRifas.find(r => r.id === rifaId);
+            if (!rifa && isLoggedIn) {
+                rifa = userRifas.find(r => r.id === rifaId);
+            }
+            
             if (!rifa) return;
 
             // Agregar números seleccionados
@@ -1378,6 +1527,11 @@
                     selected_at: new Date().toLocaleString('es-ES')
                 };
             });
+
+            // Si es rifa del usuario, guardar cambios
+            if (isLoggedIn && userRifas.find(r => r.id === rifaId)) {
+                saveUserRifasToStorage(currentUser.id, userRifas);
+            }
 
             showNotification(`¡Números seleccionados correctamente! (${participationSelected.join(', ')})`);
             

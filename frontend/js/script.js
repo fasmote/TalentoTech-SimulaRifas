@@ -7,12 +7,89 @@ let selectedNumbers = [];
 let winnerNumber = null;
 let currentUser = null;
 let authToken = localStorage.getItem('authToken');
+let participationSelected = [];
+let currentView = 'demo';
+
+// ===== SIMULACIONES PÚBLICAS (HARDCODEADAS) =====
+const publicRifas = [
+    {
+        id: 'public_1',
+        title: '🎮 PlayStation 5',
+        description: 'Simulación de ejemplo para evento gaming',
+        accessCode: 'GAMING2025',
+        status: 'active',
+        numbers: {
+            5: { participant: 'Gamer123', selected_at: '2025-07-22 14:30' },
+            12: { participant: 'PlayerOne', selected_at: '2025-07-22 15:45' },
+            23: { participant: 'ProGamer', selected_at: '2025-07-23 09:15' },
+            34: { participant: 'GameMaster', selected_at: '2025-07-23 11:20' },
+            45: { participant: 'ElitePlayer', selected_at: '2025-07-23 16:30' },
+            56: { participant: 'NinjaGamer', selected_at: '2025-07-23 18:10' },
+            67: { participant: 'ProPlayer88', selected_at: '2025-07-24 08:25' },
+            78: { participant: 'GameKing', selected_at: '2025-07-24 10:50' },
+            89: { participant: 'EliteGamer', selected_at: '2025-07-24 14:15' },
+            90: { participant: 'ChampionX', selected_at: '2025-07-24 16:40' },
+            91: { participant: 'MasterPlayer', selected_at: '2025-07-24 18:20' },
+            92: { participant: 'GameHero', selected_at: '2025-07-24 19:30' },
+            93: { participant: 'ProGaming', selected_at: '2025-07-24 20:45' },
+            94: { participant: 'EliteWarrior', selected_at: '2025-07-24 21:15' },
+            95: { participant: 'GamerLegend', selected_at: '2025-07-24 21:55' }
+        }
+    },
+    {
+        id: 'public_2',
+        title: '📱 iPhone 15 Pro',
+        description: 'Simulación de ejemplo para evento corporativo',
+        accessCode: 'CORP2025',
+        status: 'active',
+        numbers: {
+            8: { participant: 'CorpUser1', selected_at: '2025-07-23 10:00' },
+            17: { participant: 'Employee2', selected_at: '2025-07-23 14:15' },
+            29: { participant: 'TeamLead', selected_at: '2025-07-24 09:30' },
+            35: { participant: 'Manager1', selected_at: '2025-07-24 11:45' },
+            42: { participant: 'Director2', selected_at: '2025-07-24 13:20' },
+            58: { participant: 'Executive3', selected_at: '2025-07-24 15:10' },
+            73: { participant: 'Supervisor4', selected_at: '2025-07-24 17:25' },
+            86: { participant: 'Coordinator5', selected_at: '2025-07-24 19:40' }
+        }
+    },
+    {
+        id: 'public_3',
+        title: '🎁 Pack de Productos',
+        description: 'Simulación de ejemplo para evento familiar',
+        accessCode: 'FAMILY2025',
+        status: 'active',
+        numbers: {
+            3: { participant: 'Familia1', selected_at: '2025-07-22 18:00' },
+            11: { participant: 'Papa2', selected_at: '2025-07-22 19:15' },
+            19: { participant: 'Mama3', selected_at: '2025-07-23 08:45' },
+            27: { participant: 'Hijo4', selected_at: '2025-07-23 12:30' },
+            35: { participant: 'Tia5', selected_at: '2025-07-23 17:20' },
+            42: { participant: 'Primo6', selected_at: '2025-07-24 10:15' },
+            50: { participant: 'Abuela7', selected_at: '2025-07-24 11:30' },
+            61: { participant: 'Tio8', selected_at: '2025-07-24 13:45' },
+            72: { participant: 'Prima9', selected_at: '2025-07-24 15:20' },
+            83: { participant: 'Hermana10', selected_at: '2025-07-24 16:50' },
+            15: { participant: 'Cuñado11', selected_at: '2025-07-24 18:10' },
+            26: { participant: 'Sobrina12', selected_at: '2025-07-24 19:25' },
+            37: { participant: 'Nieto13', selected_at: '2025-07-24 20:40' },
+            48: { participant: 'Suegra14', selected_at: '2025-07-24 21:55' },
+            59: { participant: 'Vecina15', selected_at: '2025-07-24 22:10' },
+            6: { participant: 'Amigo16', selected_at: '2025-07-24 22:30' },
+            77: { participant: 'Compadre17', selected_at: '2025-07-24 22:45' },
+            88: { participant: 'Madrina18', selected_at: '2025-07-24 23:00' },
+            99: { participant: 'Padrino19', selected_at: '2025-07-24 23:15' },
+            14: { participant: 'Amiga20', selected_at: '2025-07-24 23:30' },
+            25: { participant: 'Vecino21', selected_at: '2025-07-24 23:45' },
+            36: { participant: 'Comadre22', selected_at: '2025-07-25 00:00' }
+        }
+    }
+];
 
 // ===== FUNCIONES DE AUTENTICACIÓN CON BACKEND =====
 
 /**
  * Verificar si el usuario está logueado
- * @returns {boolean} true si está logueado, false si no
  */
 function isUserLoggedIn() {
     return authToken && currentUser;
@@ -42,7 +119,7 @@ async function checkSessionStatus() {
             currentUser = data.data;
             authToken = token;
             updateAuthUI(true);
-            await loadUserRifas(); // Cargar rifas del usuario
+            await loadUserRifas();
             return true;
         } else {
             // Token inválido
@@ -54,9 +131,26 @@ async function checkSessionStatus() {
         }
     } catch (error) {
         console.error('Error verificando sesión:', error);
-        // Si no puede conectar al backend, mantener UI de no logueado
         updateAuthUI(false);
         return false;
+    }
+}
+
+/**
+ * Actualizar UI según estado de autenticación
+ */
+function updateAuthUI(isLoggedIn) {
+    const userSection = document.getElementById('userSection');
+    const loginSection = document.getElementById('loginSection');
+    
+    if (isLoggedIn) {
+        userSection.style.display = 'flex';
+        loginSection.style.display = 'none';
+        document.body.classList.add('is-logged-in');
+    } else {
+        userSection.style.display = 'none';
+        loginSection.style.display = 'flex';
+        document.body.classList.remove('is-logged-in');
     }
 }
 
@@ -87,218 +181,281 @@ function closeAuthModal() {
  * Limpiar campos de autenticación
  */
 function clearAuthFields() {
-    document.getElementById('loginUsername').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('registerUsername').value = '';
-    document.getElementById('registerEmail').value = '';
-    document.getElementById('registerPassword').value = '';
-    document.getElementById('registerConfirmPassword').value = '';
+    const fields = ['loginUsername', 'loginPassword', 'registerUsername', 'registerEmail', 'registerPassword', 'registerConfirmPassword'];
+    fields.forEach(field => {
+        const element = document.getElementById(field);
+        if (element) element.value = '';
+    });
 }
 
 /**
  * Cambiar de login a registro
  */
 function switchToRegister() {
-    document.getElementById('loginModal').style.display = 'none';
-    document.getElementById('registerModal').style.display = 'flex';
+    closeAuthModal();
+    showRegisterModal();
 }
 
 /**
  * Cambiar de registro a login
  */
 function switchToLogin() {
-    document.getElementById('registerModal').style.display = 'none';
-    document.getElementById('loginModal').style.display = 'flex';
+    closeAuthModal();
+    showLoginModal();
 }
 
 /**
- * Realizar login con backend
+ * Realizar login
  */
 async function performLogin() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
-    
+
     if (!username || !password) {
         showNotification('Por favor completa todos los campos', 'error');
         return;
     }
-    
+
     try {
-        showNotification('Iniciando sesión...', 'info');
-        
         const response = await fetch(`${API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username, password })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-            // Login exitoso
-            authToken = data.token;
-            currentUser = data.user;
-            
-            // Guardar token en localStorage
+            authToken = data.data.token;
+            currentUser = data.data.user;
             localStorage.setItem('authToken', authToken);
             
             updateAuthUI(true);
             closeAuthModal();
-            
-            // Cargar rifas del usuario
             await loadUserRifas();
-            
-            showNotification(`¡Bienvenido de nuevo, ${currentUser.username}!`);
+            navigateTo('rifas'); // Ir a "Mis Rifas" después del login
+            showNotification(`¡Bienvenido ${currentUser.username}!`);
         } else {
             showNotification(data.message || 'Error en el login', 'error');
         }
-        
     } catch (error) {
         console.error('Error en login:', error);
-        showNotification('Error conectando al servidor. ¿Está ejecutándose el backend?', 'error');
+        showNotification('Error de conexión. Verifica que el backend esté funcionando.', 'error');
     }
 }
 
 /**
- * Realizar registro con backend
+ * Realizar registro
  */
 async function performRegister() {
     const username = document.getElementById('registerUsername').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
     const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
-    
-    // Validaciones del frontend
+
     if (!username || !email || !password || !confirmPassword) {
         showNotification('Por favor completa todos los campos', 'error');
         return;
     }
-    
+
     if (password !== confirmPassword) {
         showNotification('Las contraseñas no coinciden', 'error');
         return;
     }
-    
-    if (password.length < 4) {
-        showNotification('La contraseña debe tener al menos 4 caracteres', 'error');
+
+    if (password.length < 6) {
+        showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
         return;
     }
-    
-    if (!email.includes('@')) {
-        showNotification('Por favor ingresa un email válido', 'error');
-        return;
-    }
-    
+
     try {
-        showNotification('Creando cuenta...', 'info');
-        
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({ username, email, password })
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-            // Registro exitoso - hacer login automático
-            authToken = data.token;
-            currentUser = data.user;
-            
-            // Guardar token en localStorage
+            authToken = data.data.token;
+            currentUser = data.data.user;
             localStorage.setItem('authToken', authToken);
             
             updateAuthUI(true);
             closeAuthModal();
-            
-            showNotification(`¡Cuenta creada exitosamente! Bienvenido, ${username}!`);
+            await loadUserRifas();
+            navigateTo('rifas'); // Ir a "Mis Rifas" después del registro
+            showNotification(`¡Cuenta creada! Bienvenido ${currentUser.username}`);
         } else {
             showNotification(data.message || 'Error en el registro', 'error');
         }
-        
     } catch (error) {
         console.error('Error en registro:', error);
-        showNotification('Error conectando al servidor. ¿Está ejecutándose el backend?', 'error');
+        showNotification('Error de conexión. Verifica que el backend esté funcionando.', 'error');
     }
 }
 
 /**
- * Actualizar interfaz de autenticación
- * @param {boolean} isLoggedIn - Si el usuario está logueado
- */
-function updateAuthUI(isLoggedIn) {
-    const userSection = document.getElementById('userSection');
-    const loginSection = document.getElementById('loginSection');
-    const userName = document.getElementById('userName');
-    const perfilNavItem = document.getElementById('perfilNavItem');
-    
-    if (isLoggedIn && currentUser) {
-        // Mostrar sección de usuario logueado
-        if (userSection) userSection.style.display = 'flex';
-        if (loginSection) loginSection.style.display = 'none';
-        if (userName) userName.textContent = currentUser.username;
-        if (perfilNavItem) perfilNavItem.style.display = 'block';
-    } else {
-        // Mostrar sección de login
-        if (userSection) userSection.style.display = 'none';
-        if (loginSection) loginSection.style.display = 'flex';
-        if (perfilNavItem) perfilNavItem.style.display = 'none';
-    }
-}
-
-/**
- * Cerrar sesión del usuario
+ * Cerrar sesión
  */
 async function logout() {
-    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-        try {
-            // Notificar al backend (opcional)
-            if (authToken) {
-                await fetch(`${API_BASE_URL}/auth/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-            }
-        } catch (error) {
-            console.log('Error notificando logout al backend:', error);
+    if (!confirm('¿Seguro que quieres cerrar sesión?')) return;
+
+    try {
+        if (authToken) {
+            await fetch(`${API_BASE_URL}/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
         }
-        
-        // Limpiar datos locales
-        currentUser = null;
-        authToken = null;
-        localStorage.removeItem('authToken');
-        userRifas = [];
-        selectedNumbers = [];
-        winnerNumber = null;
-        
-        // Actualizar interfaz
-        updateAuthUI(false);
-        
-        // Volver a la página de inicio
-        navigateTo('demo');
-        
-        showNotification('Sesión cerrada exitosamente');
+    } catch (error) {
+        console.error('Error en logout:', error);
+    }
+
+    // Limpiar datos locales
+    localStorage.removeItem('authToken');
+    authToken = null;
+    currentUser = null;
+    userRifas = [];
+    
+    updateAuthUI(false);
+    navigateTo('demo');
+    clearSelection();
+    showNotification('Sesión cerrada correctamente');
+}
+
+// ===== NAVEGACIÓN =====
+
+/**
+ * Navegación entre secciones
+ */
+function navigateTo(section) {
+    currentView = section;
+    
+    // Actualizar navegación activa
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    if (isUserLoggedIn()) {
+        const links = document.querySelectorAll('.nav-link');
+        if (section === 'rifas' && links[0]) {
+            links[0].classList.add('active');
+            showMyRifas();
+        } else if (section === 'demo' && links[1]) {
+            links[1].classList.add('active');
+            showLoggedInDemo();
+        }
     }
 }
 
-// ===== FUNCIONES DE RIFAS CON BACKEND =====
+/**
+ * Mostrar vista de rifas del usuario
+ */
+function showMyRifas() {
+    if (!isUserLoggedIn()) return;
+    
+    document.getElementById('loggedInContent').innerHTML = `
+        <div class="page-header">
+            <h1>🎯 Mis Rifas Simuladas</h1>
+            <p class="subtitle">Gestiona tus simulaciones personales</p>
+        </div>
+
+        <!-- Crear nueva simulación -->
+        <div class="form-card">
+            <h3 class="section-title">➕ Crear Nueva Simulación</h3>
+            <p style="color: #666; margin-bottom: 15px; font-style: italic;">
+                🎯 Crea simulaciones para eventos, fiestas, actividades grupales o sorteos internos
+            </p>
+            <div class="form-grid">
+                <input type="text" placeholder="Título de la simulación" class="form-input" id="rifaTitle">
+                <textarea placeholder="Descripción del evento" class="form-input" id="rifaDescription" rows="3"></textarea>
+                <input type="text" placeholder="Código de acceso (opcional)" class="form-input" id="rifaAccessCode">
+                <button type="button" class="btn btn-primary" onclick="createNewRifa()">Crear Simulación</button>
+            </div>
+        </div>
+
+        <!-- Lista de simulaciones creadas -->
+        <div class="profile-section">
+            <h3 class="section-title">🎯 Mis Simulaciones (${userRifas.length})</h3>
+            <div id="userRifasList">
+                ${generateUserRifasHTML()}
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Mostrar demo para usuario logueado
+ */
+function showLoggedInDemo() {
+    document.getElementById('loggedInContent').innerHTML = `
+        <div class="page-header">
+            <h1>🎲 Demo Avanzado</h1>
+            <p class="subtitle">Prueba todas las funcionalidades</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="numbers-section">
+                <h3 class="section-title">🎯 Grilla de Prueba</h3>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="selectRandomNumber()">🎯 Elegir al Azar</button>
+                    <button class="btn btn-primary" onclick="clearSelection()">🗑️ Limpiar Todo</button>
+                    <button class="btn btn-success" onclick="drawWinner()">🏆 Sortear Ganador</button>
+                </div>
+                
+                <div class="numbers-grid" id="numbersGridLoggedIn">
+                    <!-- Se genera con JavaScript -->
+                </div>
+            </div>
+
+            <div class="cart-section">
+                <div class="cart-header">
+                    <span class="cart-icon">🎯</span>
+                    <h3 class="cart-title">Demo Avanzado</h3>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #333; margin-bottom: 10px; font-size: 1rem;">Prueba códigos públicos:</h4>
+                    <button class="btn btn-info btn-small" style="width: 100%; margin-bottom: 8px;" onclick="accessByCode('GAMING2025')">
+                        🎮 GAMING2025
+                    </button>
+                    <button class="btn btn-info btn-small" style="width: 100%; margin-bottom: 8px;" onclick="accessByCode('CORP2025')">
+                        📱 CORP2025
+                    </button>
+                    <button class="btn btn-info btn-small" style="width: 100%; margin-bottom: 15px;" onclick="accessByCode('FAMILY2025')">
+                        🎁 FAMILY2025
+                    </button>
+                </div>
+                
+                <div class="cart-items" id="selectedNumbersLoggedIn">
+                    <div class="empty-cart">
+                        Prueba los códigos de arriba o la grilla
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    generateNumbersGrid('numbersGridLoggedIn');
+}
+
+// ===== GESTIÓN DE RIFAS DEL USUARIO =====
 
 /**
  * Cargar rifas del usuario desde el backend
  */
 async function loadUserRifas() {
-    if (!authToken) {
-        userRifas = [];
-        return;
-    }
-    
+    if (!authToken) return;
+
     try {
         const response = await fetch(`${API_BASE_URL}/rifas/my`, {
             method: 'GET',
@@ -307,21 +464,10 @@ async function loadUserRifas() {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (response.ok) {
             const data = await response.json();
-            userRifas = data.data.map(rifa => ({
-                id: rifa.id,
-                title: rifa.title,
-                description: rifa.description || '',
-                price: rifa.price_per_number || 0,
-                sold: [], // Los números se cargan por separado si es necesario
-                created: new Date(rifa.created_at).toLocaleDateString('es-ES'),
-                status: rifa.status,
-                winner_number: rifa.winner_number
-            }));
-            
-            console.log(`${userRifas.length} rifas cargadas desde el backend`);
+            userRifas = data.data || [];
         } else {
             console.error('Error cargando rifas del usuario');
             userRifas = [];
@@ -333,442 +479,278 @@ async function loadUserRifas() {
 }
 
 /**
- * Crear nueva rifa en el backend
+ * Crear nueva rifa
  */
 async function createNewRifa() {
-    if (!authToken) {
-        showNotification('Debes iniciar sesión para crear una rifa', 'error');
-        return;
-    }
-    
-    const titleElement = document.getElementById('rifaTitle');
-    const descriptionElement = document.getElementById('rifaDescription');
-    const priceElement = document.getElementById('rifaPrice');
-    
-    if (!titleElement || !descriptionElement || !priceElement) {
-        showNotification('Error: No se encontraron los campos del formulario', 'error');
-        return;
-    }
-    
-    const title = titleElement.value.trim();
-    const description = descriptionElement.value.trim();
-    const price = parseFloat(priceElement.value) || 0;
-    
+    const title = document.getElementById('rifaTitle').value.trim();
+    const description = document.getElementById('rifaDescription').value.trim();
+    const accessCode = document.getElementById('rifaAccessCode').value.trim();
+
     if (!title || !description) {
         showNotification('Por favor completa título y descripción', 'error');
         return;
     }
-    
+
     try {
-        showNotification('Creando rifa...', 'info');
-        
+        const rifaData = {
+            title,
+            description,
+            access_code: accessCode || undefined
+        };
+
         const response = await fetch(`${API_BASE_URL}/rifas`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${authToken}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                title: title,
-                description: description,
-                price_per_number: price > 0 ? price : null
-            })
+            body: JSON.stringify(rifaData)
         });
-        
+
         const data = await response.json();
-        
+
         if (response.ok) {
-            // Rifa creada exitosamente
-            const nuevaRifa = {
-                id: data.data.id,
-                title: data.data.title,
-                description: data.data.description || '',
-                price: data.data.price_per_number || 0,
-                sold: [],
-                created: new Date(data.data.created_at).toLocaleDateString('es-ES'),
-                status: data.data.status
-            };
-            
-            userRifas.push(nuevaRifa);
+            await loadUserRifas(); // Recargar rifas
             
             // Limpiar formulario
-            titleElement.value = '';
-            descriptionElement.value = '';
-            priceElement.value = '';
+            document.getElementById('rifaTitle').value = '';
+            document.getElementById('rifaDescription').value = '';
+            document.getElementById('rifaAccessCode').value = '';
             
-            // Actualizar interfaz
-            updateUserRifasList();
+            // Actualizar lista
+            document.getElementById('userRifasList').innerHTML = generateUserRifasHTML();
+            document.querySelector('.profile-section h3').textContent = `🎯 Mis Simulaciones (${userRifas.length})`;
             
-            // Actualizar estadísticas
-            const statNumber = document.querySelector('.stat-card:nth-child(2) .stat-number');
-            if (statNumber) {
-                statNumber.textContent = userRifas.length;
-            }
-            
-            showNotification(`¡Rifa "${title}" creada exitosamente!`);
+            showNotification(`¡Simulación "${title}" creada! Código: ${data.data.access_code}`);
         } else {
             showNotification(data.message || 'Error creando la rifa', 'error');
         }
-        
     } catch (error) {
         console.error('Error creando rifa:', error);
-        showNotification('Error conectando al servidor', 'error');
+        showNotification('Error de conexión', 'error');
     }
 }
 
 /**
- * Eliminar rifa del backend
+ * Generar HTML de rifas del usuario
  */
-async function deleteRifa(rifaId) {
-    if (!authToken) {
-        showNotification('Debes iniciar sesión', 'error');
-        return;
-    }
-    
-    if (confirm('¿Estás seguro de que quieres eliminar esta rifa?')) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/rifas/${rifaId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                // Eliminar de la lista local
-                userRifas = userRifas.filter(r => r.id !== rifaId);
-                updateUserRifasList();
-                
-                // Actualizar estadísticas
-                const statNumber = document.querySelector('.stat-card:nth-child(2) .stat-number');
-                if (statNumber) {
-                    statNumber.textContent = userRifas.length;
-                }
-                
-                showNotification('Rifa eliminada exitosamente!');
-            } else {
-                showNotification(data.message || 'Error eliminando la rifa', 'error');
-            }
-            
-        } catch (error) {
-            console.error('Error eliminando rifa:', error);
-            showNotification('Error conectando al servidor', 'error');
-        }
-    }
-}
-
-/**
- * Editar rifa en el backend
- */
-async function editRifa(rifaId) {
-    if (!authToken) {
-        showNotification('Debes iniciar sesión', 'error');
-        return;
-    }
-    
-    const rifa = userRifas.find(r => r.id === rifaId);
-    if (!rifa) return;
-    
-    const newTitle = prompt('Nuevo título:', rifa.title);
-    if (newTitle === null) return;
-    
-    const newDescription = prompt('Nueva descripción:', rifa.description);
-    if (newDescription === null) return;
-    
-    const newPrice = prompt('Nuevo precio por número (0 para gratis):', rifa.price);
-    if (newPrice === null) return;
-    
-    if (newTitle && newDescription) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/rifas/${rifaId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: newTitle,
-                    description: newDescription,
-                    price_per_number: parseFloat(newPrice) || null
-                })
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
-                // Actualizar en la lista local
-                rifa.title = newTitle;
-                rifa.description = newDescription;
-                rifa.price = parseFloat(newPrice) || 0;
-                updateUserRifasList();
-                showNotification('Rifa actualizada exitosamente!');
-            } else {
-                showNotification(data.message || 'Error actualizando la rifa', 'error');
-            }
-            
-        } catch (error) {
-            console.error('Error editando rifa:', error);
-            showNotification('Error conectando al servidor', 'error');
-        }
-    }
-}
-
-// ===== FUNCIONES DE NAVEGACIÓN (sin cambios) =====
-
-function toggleMobileMenu() {
-    const navLinks = document.getElementById('navLinks');
-    navLinks.classList.toggle('active');
-}
-
-function navigateTo(page) {
-    if (page === 'perfil' && !isUserLoggedIn()) {
-        showNotification('Debes iniciar sesión para acceder a tu perfil', 'error');
-        showLoginModal();
-        return;
-    }
-    
-    switch(page) {
-        case 'rifas':
-            showRifasPage();
-            updateActiveNav('rifas');
-            break;
-        case 'perfil':
-            showPerfilPage();
-            updateActiveNav('perfil');
-            break;
-        case 'demo':
-            showDemoPage();
-            updateActiveNav('demo');
-            break;
-    }
-    
-    document.getElementById('navLinks').classList.remove('active');
-}
-
-function updateActiveNav(activePage) {
-    document.querySelectorAll('.nav-links a').forEach(link => {
-        link.classList.remove('active');
-    });
-    
-    let pageIndex;
-    switch(activePage) {
-        case 'demo': pageIndex = 0; break;
-        case 'rifas': pageIndex = 1; break;
-        case 'perfil': pageIndex = 2; break;
-        default: pageIndex = 0;
-    }
-    
-    const navLinks = document.querySelectorAll('.nav-links a');
-    if (navLinks[pageIndex]) {
-        navLinks[pageIndex].classList.add('active');
-    }
-}
-
-// ===== FUNCIONES DE PÁGINAS =====
-
-function showRifasPage() {
-    document.querySelector('.container').innerHTML = `
-        <div class="page-header">
-            <h1>🎊 Simulaciones Públicas</h1>
-            <p class="subtitle">Ejemplos desarrollados en Talento Tech curso NODE.JS</p>
-        </div>
-        
-        <div style="background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
-            <p style="margin: 0; color: #666; font-style: italic;">
-                🎯 <strong>Proyecto Educativo Talento Tech curso NODE.JS</strong> - Simulaciones con backend real
-            </p>
-        </div>
-        
-        <div class="rifas-grid">
-            <div class="rifa-card">
-                <div class="rifa-image">🎮</div>
-                <h3>PlayStation 5</h3>
-                <p class="rifa-description">Ejemplo de simulación con backend</p>
-                <div class="rifa-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 65%"></div>
-                    </div>
-                    <span class="progress-text">65/100 números seleccionados</span>
-                </div>
-                <div class="rifa-price" style="color: #2196f3;">Con persistencia de datos</div>
-                <button class="btn btn-primary" onclick="showRifaDetail('ps5')">Ver Simulación</button>
-            </div>
-            
-            ${generateUserRifasHTML()}
-        </div>
-        
-        <div class="back-to-demo">
-            <button class="btn btn-secondary" onclick="navigateTo('demo')">← Volver al Inicio</button>
-        </div>
-    `;
-}
-
 function generateUserRifasHTML() {
-    return userRifas.map(rifa => `
-        <div class="rifa-card">
-            <div class="rifa-image">🎁</div>
-            <h3>${rifa.title}</h3>
-            <p class="rifa-description">${rifa.description}</p>
-            <div class="rifa-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${(rifa.sold.length / 100) * 100}%"></div>
-                </div>
-                <span class="progress-text">${rifa.sold.length}/100 números seleccionados</span>
-            </div>
-            <div class="rifa-price" style="color: #2196f3;">ID: ${rifa.id} - ${rifa.status}</div>
-            <button class="btn btn-primary" onclick="showRifaDetail('user_${rifa.id}')">Ver Simulación</button>
-        </div>
-    `).join('');
-}
-
-function showPerfilPage() {
-    document.querySelector('.container').innerHTML = `
-        <div class="page-header">
-            <h1>👤 Mi Perfil</h1>
-            <p class="subtitle">Panel de estudiante - Talento Tech curso NODE.JS</p>
-        </div>
-        
-        <div class="profile-content">
-            <div class="profile-section">
-                <h3>📊 Mis Estadísticas</h3>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">5</div>
-                        <div class="stat-label">Simulaciones Probadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">${userRifas.length}</div>
-                        <div class="stat-label">Rifas Creadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">1</div>
-                        <div class="stat-label">Backend Conectado ✅</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="profile-section">
-                <h3>➕ Crear Nueva Rifa</h3>
-                <p style="color: #666; margin-bottom: 15px; font-style: italic;">
-                    🎯 Crea rifas reales que se guardan en la base de datos
-                </p>
-                <div class="create-rifa-form">
-                    <input type="text" placeholder="Título de la rifa" class="form-input" id="rifaTitle">
-                    <textarea placeholder="Descripción del premio" class="form-textarea" id="rifaDescription"></textarea>
-                    <input type="number" placeholder="Precio por número (opcional)" class="form-input" id="rifaPrice" min="0" step="0.01">
-                    <button type="button" class="btn btn-success" onclick="createNewRifa()">Crear Rifa</button>
-                </div>
-            </div>
-            
-            <div class="profile-section" id="userRifasSection">
-                <h3>🎯 Mis Rifas Creadas</h3>
-                <div id="userRifasList">
-                    ${userRifas.length === 0 ? '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna rifa aún</p>' : ''}
-                </div>
-            </div>
-        </div>
-        
-        <div class="back-to-demo">
-            <button class="btn btn-secondary" onclick="navigateTo('demo')">← Volver al Inicio</button>
-        </div>
-    `;
-    
-    setTimeout(() => {
-        updateUserRifasList();
-    }, 100);
-}
-
-function updateUserRifasList() {
-    const userRifasList = document.getElementById('userRifasList');
-    
-    if (!userRifasList) {
-        return;
-    }
-    
     if (userRifas.length === 0) {
-        userRifasList.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna rifa aún</p>';
-        return;
+        return '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna simulación aún. ¡Empieza creando tu primera simulación!</p>';
     }
-    
-    userRifasList.innerHTML = userRifas.map(rifa => `
+
+    return userRifas.map(rifa => `
         <div class="user-rifa-card">
             <div class="user-rifa-header">
                 <h4>${rifa.title}</h4>
-                <span class="rifa-date">Creada: ${rifa.created}</span>
+                <span class="rifa-date">Creada: ${new Date(rifa.created_at).toLocaleDateString('es-ES')}</span>
             </div>
             <p class="user-rifa-description">${rifa.description}</p>
             <div class="user-rifa-stats">
-                <span class="stat-item">💰 ${rifa.price > 0 ? `$${rifa.price}` : 'Gratis'} por número</span>
-                <span class="stat-item">📊 ID: ${rifa.id}</span>
-                <span class="stat-item">🎯 Estado: ${rifa.status}</span>
+                <span class="stat-item">🔑 Código: <strong>${rifa.access_code}</strong></span>
+                <span class="stat-item">👥 Participantes: ${rifa.participants_count || 0}/100</span>
+                <span class="stat-item">📊 Estado: ${rifa.status === 'active' ? 'Activo' : 'Finalizado'}</span>
             </div>
             <div class="user-rifa-actions">
-                <button class="btn btn-secondary btn-small" onclick="editRifa(${rifa.id})">✏️ Editar</button>
-                <button class="btn btn-primary btn-small" onclick="deleteRifa(${rifa.id})">🗑️ Eliminar</button>
+                <button class="btn btn-info btn-small" onclick="manageRifa(${rifa.id})">
+                    🎯 Gestionar
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="editRifa(${rifa.id})">
+                    ✏️ Editar
+                </button>
+                <button class="btn btn-danger btn-small" onclick="deleteRifa(${rifa.id})">
+                    🗑️ Eliminar
+                </button>
             </div>
         </div>
     `).join('');
 }
 
-// ===== FUNCIONES DE JUEGO (sin cambios) =====
+/**
+ * Gestionar rifa específica
+ */
+function manageRifa(rifaId) {
+    showNotification('Funcionalidad de gestión en desarrollo', 'info');
+}
 
-function showDemoPage() {
-    document.querySelector('.container').innerHTML = `
-        <header>
-            <h1>🎲 Simulador de Rifas</h1>
-            <p class="subtitle">Proyecto desarrollado en Talento Tech curso NODE.JS</p>
-        </header>
+/**
+ * Editar rifa
+ */
+function editRifa(rifaId) {
+    showNotification('Funcionalidad de edición en desarrollo', 'info');
+}
 
-        <div class="main-content">
-            <div class="numbers-section">
-                <div class="controls">
-                    <button class="btn btn-secondary" onclick="selectRandomNumber()">
-                        🎯 Elegir al Azar
-                    </button>
-                    <button class="btn btn-primary" onclick="clearSelection()">
-                        🗑️ Limpiar Todo
-                    </button>
-                    <button class="btn btn-success" onclick="drawWinner()">
-                        🏆 Simular Sorteo
-                    </button>
-                </div>
-                
-                <div class="numbers-grid" id="numbersGrid">
-                    <!-- Los números se generan con JavaScript -->
-                </div>
-            </div>
+/**
+ * Eliminar rifa
+ */
+async function deleteRifa(rifaId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta simulación?')) return;
 
-            <div class="cart-section">
-                <div class="cart-header">
-                    <span class="cart-icon">🎯</span>
-                    <h3 class="cart-title">Números Seleccionados</h3>
-                    <div class="cart-count" id="cartCount">0</div>
-                </div>
-                
-                <div class="cart-items" id="cartItems">
-                    <div class="empty-cart">
-                        No has seleccionado números aún
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" style="width: 100%;" onclick="drawWinner()">
-                    🎊 ¡Simular Sorteo!
-                </button>
+    try {
+        const response = await fetch(`${API_BASE_URL}/rifas/${rifaId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            await loadUserRifas();
+            document.getElementById('userRifasList').innerHTML = generateUserRifasHTML();
+            document.querySelector('.profile-section h3').textContent = `🎯 Mis Simulaciones (${userRifas.length})`;
+            showNotification('Simulación eliminada correctamente');
+        } else {
+            const data = await response.json();
+            showNotification(data.message || 'Error eliminando la rifa', 'error');
+        }
+    } catch (error) {
+        console.error('Error eliminando rifa:', error);
+        showNotification('Error de conexión', 'error');
+    }
+}
+
+// ===== FUNCIONALIDAD DE ACCESO POR CÓDIGO =====
+
+/**
+ * Acceder a una rifa por código
+ */
+function accessByCode(code = null) {
+    const inputCode = code || document.getElementById('accessCodeInput').value.trim().toUpperCase();
+    
+    if (!inputCode) {
+        showNotification('Ingresa un código de acceso', 'error');
+        return;
+    }
+
+    // Buscar en simulaciones públicas
+    const rifa = publicRifas.find(r => r.accessCode === inputCode);
+    
+    if (!rifa) {
+        showNotification('Código de acceso no válido', 'error');
+        return;
+    }
+
+    showRifaParticipation(rifa);
+    
+    // Limpiar campo
+    if (!code) { // Solo limpiar si no viene de botón directo
+        document.getElementById('accessCodeInput').value = '';
+    }
+}
+
+/**
+ * Mostrar modal de participación en rifa
+ */
+function showRifaParticipation(rifa) {
+    const participantCount = Object.keys(rifa.numbers).length;
+    
+    document.getElementById('rifaTitle').textContent = rifa.title;
+    document.getElementById('rifaInfo').innerHTML = `
+        <p style="color: #666; margin-bottom: 15px;">${rifa.description}</p>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <span class="stat-item">🔑 Código: <strong>${rifa.accessCode}</strong></span>
+                <span class="stat-item">👥 Participantes: <strong>${participantCount}/100</strong></span>
+                <span class="stat-item">📊 Estado: <strong>Activo</strong></span>
             </div>
         </div>
     `;
     
-    selectedNumbers = [];
-    winnerNumber = null;
-    generateNumbersGrid();
-    updateCart();
+    document.getElementById('participationGrid').innerHTML = generateParticipationGrid(rifa.numbers);
+    document.getElementById('participantName').value = '';
+    participationSelected = [];
+    
+    document.getElementById('codeAccessModal').style.display = 'flex';
 }
 
-function generateNumbersGrid() {
-    const grid = document.getElementById('numbersGrid');
+/**
+ * Generar grilla de participación
+ */
+function generateParticipationGrid(takenNumbers) {
+    let html = '<div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 20px;">';
+    
+    for (let i = 0; i <= 99; i++) {
+        const numberStr = i.toString().padStart(2, '0');
+        const isTaken = takenNumbers[i];
+        const participantName = isTaken ? isTaken.participant : '';
+        
+        html += `
+            <div style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
+                 background: ${isTaken ? '#ff6b6b' : '#f8f9fa'}; 
+                 color: ${isTaken ? 'white' : '#333'}; 
+                 border: 2px solid ${isTaken ? '#ff6b6b' : '#e9ecef'};
+                 border-radius: 6px; font-size: 0.9rem; font-weight: bold; 
+                 cursor: ${isTaken ? 'not-allowed' : 'pointer'};
+                 transition: all 0.3s ease;"
+                 onclick="${isTaken ? '' : 'toggleParticipationNumber(' + i + ')'}"
+                 id="part-number-${i}"
+                 title="${isTaken ? `Ocupado por: ${participantName}` : 'Clic para seleccionar'}">${numberStr}</div>
+        `;
+    }
+    
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Alternar selección de número en participación
+ */
+function toggleParticipationNumber(number) {
+    const cell = document.getElementById(`part-number-${number}`);
+    if (!cell || cell.style.background === 'rgb(255, 107, 107)') return;
+    
+    if (participationSelected.includes(number)) {
+        participationSelected = participationSelected.filter(n => n !== number);
+        cell.style.background = '#f8f9fa';
+        cell.style.borderColor = '#e9ecef';
+        cell.style.color = '#333';
+    } else {
+        participationSelected.push(number);
+        cell.style.background = 'linear-gradient(45deg, #4caf50, #8bc34a)';
+        cell.style.borderColor = '#4caf50';
+        cell.style.color = 'white';
+    }
+}
+
+/**
+ * Confirmar participación
+ */
+function confirmParticipation() {
+    const participantName = document.getElementById('participantName').value.trim();
+    
+    if (!participantName) {
+        showNotification('Ingresa tu nombre', 'error');
+        return;
+    }
+
+    if (participationSelected.length === 0) {
+        showNotification('Selecciona al menos un número', 'error');
+        return;
+    }
+
+    // Simular guardado (en una app real, esto sería una llamada al backend)
+    showNotification(`¡Números seleccionados correctamente! (${participationSelected.join(', ')}) por ${participantName}`);
+    
+    participationSelected = [];
+    closeCodeModal();
+}
+
+/**
+ * Cerrar modal de código
+ */
+function closeCodeModal() {
+    document.getElementById('codeAccessModal').style.display = 'none';
+    participationSelected = [];
+}
+
+// ===== FUNCIONALIDAD DE LA GRILLA DE NÚMEROS =====
+
+/**
+ * Generar grilla de números
+ */
+function generateNumbersGrid(containerId = 'numbersGrid') {
+    const grid = document.getElementById(containerId);
     if (!grid) return;
     
     grid.innerHTML = '';
@@ -777,14 +759,17 @@ function generateNumbersGrid() {
         const cell = document.createElement('div');
         cell.className = 'number-cell';
         cell.textContent = i.toString().padStart(2, '0');
-        cell.onclick = () => toggleNumber(i);
-        cell.id = `number-${i}`;
+        cell.onclick = () => toggleNumber(i, containerId);
+        cell.id = `number-${i}-${containerId}`;
         grid.appendChild(cell);
     }
 }
 
-function toggleNumber(number) {
-    const cell = document.getElementById(`number-${number}`);
+/**
+ * Alternar selección de número
+ */
+function toggleNumber(number, containerId = 'numbersGrid') {
+    const cell = document.getElementById(`number-${number}-${containerId}`);
     const index = selectedNumbers.indexOf(number);
     
     if (index > -1) {
@@ -795,98 +780,130 @@ function toggleNumber(number) {
         cell.classList.add('selected');
     }
     
-    updateCart();
+    updateSelectedDisplay(containerId);
 }
 
-function updateCart() {
-    const cartItems = document.getElementById('cartItems');
-    const cartCount = document.getElementById('cartCount');
+/**
+ * Actualizar visualización de números seleccionados
+ */
+function updateSelectedDisplay(containerId = 'numbersGrid') {
+    const cartItemsId = containerId === 'numbersGrid' ? 'cartItems' : 'selectedNumbersLoggedIn';
+    const cartCountId = containerId === 'numbersGrid' ? 'cartCount' : null;
     
-    if (!cartItems || !cartCount) return;
+    const container = document.getElementById(cartItemsId);
+    const counter = document.getElementById(cartCountId);
     
-    cartCount.textContent = selectedNumbers.length;
+    if (counter) {
+        counter.textContent = selectedNumbers.length;
+    }
+    
+    if (!container) return;
     
     if (selectedNumbers.length === 0) {
-        cartItems.innerHTML = '<div class="empty-cart">No has seleccionado números aún</div>';
+        container.innerHTML = '<div class="empty-cart">Selecciona números en la grilla</div>';
         return;
     }
     
     const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b);
-    cartItems.innerHTML = sortedNumbers.map(number => `
+    container.innerHTML = sortedNumbers.map(number => `
         <div class="cart-item">
             <span class="cart-item-number">${number.toString().padStart(2, '0')}</span>
-            <button class="remove-btn" onclick="toggleNumber(${number})">✕</button>
+            <button class="remove-btn" onclick="toggleNumber(${number}, '${containerId}')">✕</button>
         </div>
     `).join('');
 }
 
+/**
+ * Seleccionar número al azar
+ */
 function selectRandomNumber() {
-    const randomNumber = Math.floor(Math.random() * 100);
-    
-    if (!selectedNumbers.includes(randomNumber)) {
-        selectedNumbers.push(randomNumber);
-        document.getElementById(`number-${randomNumber}`).classList.add('selected');
-        updateCart();
+    const availableNumbers = [];
+    for (let i = 0; i <= 99; i++) {
+        if (!selectedNumbers.includes(i)) {
+            availableNumbers.push(i);
+        }
     }
+    
+    if (availableNumbers.length === 0) {
+        showNotification('Ya tienes todos los números seleccionados', 'info');
+        return;
+    }
+    
+    const randomNumber = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+    const containerId = currentView === 'demo' ? 'numbersGrid' : 'numbersGridLoggedIn';
+    
+    selectedNumbers.push(randomNumber);
+    const cell = document.getElementById(`number-${randomNumber}-${containerId}`);
+    if (cell) {
+        cell.classList.add('selected');
+    }
+    updateSelectedDisplay(containerId);
 }
 
+/**
+ * Limpiar selección
+ */
 function clearSelection() {
+    const containerId = currentView === 'demo' ? 'numbersGrid' : 'numbersGridLoggedIn';
+    
     selectedNumbers.forEach(number => {
-        const cell = document.getElementById(`number-${number}`);
+        const cell = document.getElementById(`number-${number}-${containerId}`);
         if (cell) {
             cell.classList.remove('selected', 'winner');
         }
     });
-    
     selectedNumbers = [];
     winnerNumber = null;
-    updateCart();
+    updateSelectedDisplay(containerId);
     
-    const winnerModal = document.getElementById('winnerModal');
-    if (winnerModal) {
-        winnerModal.style.display = 'none';
-    }
+    closeWinnerModal();
 }
 
+/**
+ * Sortear ganador
+ */
 function drawWinner() {
     if (selectedNumbers.length === 0) {
         showNotification('¡Primero debes seleccionar al menos un número!', 'error');
         return;
     }
 
+    const containerId = currentView === 'demo' ? 'numbersGrid' : 'numbersGridLoggedIn';
+    
+    // Limpiar ganador anterior
     if (winnerNumber !== null) {
-        const prevWinnerCell = document.getElementById(`number-${winnerNumber}`);
-        if (prevWinnerCell) {
-            prevWinnerCell.classList.remove('winner');
+        const cell = document.getElementById(`number-${winnerNumber}-${containerId}`);
+        if (cell) {
+            cell.classList.remove('winner');
         }
     }
 
+    // Seleccionar ganador al azar
     const randomIndex = Math.floor(Math.random() * selectedNumbers.length);
     winnerNumber = selectedNumbers[randomIndex];
     
-    const winnerCell = document.getElementById(`number-${winnerNumber}`);
+    // Mostrar animación
+    const winnerCell = document.getElementById(`number-${winnerNumber}-${containerId}`);
     if (winnerCell) {
         winnerCell.classList.add('winner');
     }
     
-    const winnerModal = document.getElementById('winnerModal');
-    if (winnerModal) {
-        const winnerDisplay = document.getElementById('winnerNumber');
-        const winnerText = document.getElementById('winnerText');
-        
-        winnerDisplay.textContent = winnerNumber.toString().padStart(2, '0');
-        winnerText.textContent = winnerNumber.toString().padStart(2, '0');
-        winnerModal.style.display = 'flex';
-    }
+    // Mostrar modal de resultado
+    document.getElementById('winnerNumber').textContent = winnerNumber.toString().padStart(2, '0');
+    document.getElementById('winnerText').textContent = winnerNumber.toString().padStart(2, '0');
+    document.getElementById('winnerModal').style.display = 'flex';
 }
 
+/**
+ * Cerrar modal de ganador
+ */
 function closeWinnerModal() {
-    const winnerModal = document.getElementById('winnerModal');
-    if (winnerModal) {
-        winnerModal.style.display = 'none';
-    }
+    document.getElementById('winnerModal').style.display = 'none';
 }
 
+/**
+ * Resetear juego
+ */
 function resetGame() {
     clearSelection();
     closeWinnerModal();
@@ -894,6 +911,9 @@ function resetGame() {
 
 // ===== FUNCIONES DE UTILIDAD =====
 
+/**
+ * Mostrar notificación
+ */
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type === 'error' ? 'error' : type === 'info' ? 'info' : ''}`;
@@ -903,57 +923,35 @@ function showNotification(message, type = 'success') {
     
     setTimeout(() => {
         notification.remove();
-    }, 3000);
+    }, 4000);
+}
+
+/**
+ * Alternar menú móvil
+ */
+function toggleMobileMenu() {
+    // Funcionalidad para menú móvil (si es necesaria)
+    console.log('Toggle mobile menu');
 }
 
 // ===== INICIALIZACIÓN =====
-
 document.addEventListener('DOMContentLoaded', async function() {
-    // Generar grilla inicial
-    generateNumbersGrid();
-    updateCart();
-    
-    // Verificar estado de sesión con el backend
+    // Verificar sesión al cargar
     await checkSessionStatus();
     
-    console.log('Simulador de Rifas inicializado - Conectado al backend');
-    console.log('Backend URL:', API_BASE_URL);
+    // Generar grilla inicial
+    generateNumbersGrid();
+    updateSelectedDisplay();
     
-    // Configurar event listeners para modales
-    setupModalEventListeners();
-});
-
-function setupModalEventListeners() {
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('auth-modal')) {
-            closeAuthModal();
-        }
-        if (event.target.classList.contains('winner-modal')) {
-            closeWinnerModal();
-        }
-    });
-    
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeAuthModal();
-            closeWinnerModal();
-        }
-    });
-    
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            if (document.getElementById('loginModal').style.display === 'flex') {
-                event.preventDefault();
-                performLogin();
-            } else if (document.getElementById('registerModal').style.display === 'flex') {
-                event.preventDefault();
-                performRegister();
+    // Configurar eventos del teclado para el campo de código
+    const codeInput = document.getElementById('accessCodeInput');
+    if (codeInput) {
+        codeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                accessByCode();
             }
-        }
-    });
-}
-
-// Función para mostrar login desde la navegación
-function login() {
-    showLoginModal();
-}
+        });
+    }
+    
+    console.log('🎲 SimulaRifa TT inicializada correctamente');
+});
