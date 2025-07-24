@@ -875,3 +875,82 @@ h1 {
         gap: 10px;
     }
 }
+
+/* ===== ESTILOS PARA MODALES DE AUTENTICACIÓN ===== */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.auth-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 400px;
+    width: 90%;
+    animation: slideIn 0.5s ease;
+}
+
+.auth-content h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.auth-form {
+    margin-bottom: 20px;
+}
+
+.auth-form input {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.auth-form p {
+    margin: 0;
+}
+
+.auth-form a {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-form a:hover {
+    text-decoration: underline;
+}
+
+/* Animaciones para modales de autenticación */
+@keyframes slideIn {
+    from { 
+        transform: translateY(-50px) scale(0.8); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateY(0) scale(1); 
+        opacity: 1; 
+    }
+}
+
+/* Responsive para modales de autenticación */
+@media (max-width: 480px) {
+    .auth-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .auth-content h2 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+}

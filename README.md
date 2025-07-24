@@ -8,19 +8,28 @@ Un simulador interactivo de rifas con autenticación de usuarios y base de datos
 
 - 🎯 **Simulador de rifas interactivo** - Selección de números del 00 al 99
 - 🎊 **Sorteo aleatorio** - Sistema de sorteo justo y transparente
-- 👤 **Autenticación JWT** - Sistema seguro de usuarios ✅
-- 🔐 **Contraseñas encriptadas** - Seguridad con bcryptjs ✅
-- 🗄️ **Base de datos SQLite** - Conectada y funcionando ✅
+- 👤 **Sistema de autenticación completo** - Login/Registro con localStorage ✅
+- 🔐 **Gestión de usuarios segura** - Validaciones y contraseñas encriptadas ✅
+- 🗄️ **Persistencia de datos** - LocalStorage para usuarios y simulaciones ✅
 - 📱 **Diseño responsivo** - Funciona en móviles y desktop
-- 🎨 **Interfaz moderna** - Diseño atractivo y fácil de usar
+- 🎨 **Interfaz moderna** - Modales elegantes y animaciones
+- 🎮 **Modo demo sin registro** - Funciona para usuarios anónimos
 
-## 🚀 Demo en Vivo
+## 🚀 Cómo Usar
 
+### Opción 1: Usar directamente (Solo Frontend)
 ```bash
 # Clonar el repositorio
-git clone https://github.com/TU_USUARIO/simulador-rifas-bd.git
+git clone https://github.com/fasmote/simulador-rifas-bd.git
 
-# Instalar dependencias
+# Abrir el archivo HTML en tu navegador
+cd simulador-rifas-bd/frontend
+# Hacer doble click en index.html
+```
+
+### Opción 2: Con servidor backend (Completo)
+```bash
+# Instalar dependencias del backend
 cd simulador-rifas-bd/backend
 npm install
 
@@ -31,12 +40,18 @@ npm run dev
 # http://localhost:3000
 ```
 
+### 🧪 Usuarios de Prueba
+- **Usuario:** admin | **Contraseña:** 1234
+- **Usuario:** estudiante1 | **Contraseña:** 1234  
+- **Usuario:** demo | **Contraseña:** demo
+
 ## 🛠️ Tecnologías Utilizadas
 
 ### Frontend
 - **HTML5** - Estructura semántica
 - **CSS3** - Estilos modernos con gradientes y animaciones
-- **JavaScript Vanilla** - Lógica del simulador
+- **JavaScript Vanilla** - Lógica del simulador y autenticación
+- **LocalStorage** - Persistencia de usuarios y datos ✅
 
 ### Backend
 - **Node.js** - Entorno de ejecución
@@ -70,16 +85,22 @@ simulador-rifas-bd/
 
 ## 📋 Estado del Desarrollo
 
-- ✅ **Servidor Express funcionando**
-- ✅ **Git configurado y subido a GitHub**  
-- ✅ **Base de datos SQLite conectada**
-- ✅ **Sistema de autenticación JWT completo**
+### Frontend (Completado ✅)
+- ✅ **Sistema de autenticación con modales**
 - ✅ **Registro y login de usuarios**
-- ✅ **Encriptación de contraseñas**
-- ✅ **Middleware de protección de rutas**
-- ✅ **Scripts de pruebas automatizados**
-- ⏳ **API REST para rifas** (próximo paso)
-- ⏳ **Integración frontend-backend** (planificado)
+- ✅ **Validaciones de formularios**
+- ✅ **Persistencia con localStorage**
+- ✅ **Interfaz responsiva y moderna**
+- ✅ **Gestión de sesiones**
+- ✅ **Creación de simulaciones personalizadas**
+- ✅ **Usuarios de ejemplo para pruebas**
+
+### Backend (En desarrollo 🔧)
+- ✅ **Servidor Express funcionando**
+- ✅ **Base de datos SQLite configurada**
+- ✅ **API de autenticación JWT**
+- ⏳ **Integración frontend-backend**
+- ⏳ **API REST para rifas**
 
 ## 🎯 Funcionalidades Implementadas
 
@@ -91,20 +112,28 @@ simulador-rifas-bd/
 - Animaciones y efectos visuales
 - Modal de resultado del sorteo
 
-### Sistema de Autenticación (Backend) ✅
-- **POST /api/auth/register** - Registro de usuarios
-- **POST /api/auth/login** - Inicio de sesión
-- **GET /api/auth/me** - Información del usuario
-- **POST /api/auth/logout** - Cerrar sesión
-- **Middleware JWT** - Protección de rutas
-- **Contraseñas encriptadas** - Seguridad bcryptjs
+### Sistema de Autenticación (Frontend) ✅
+- **Registro de usuarios** - Formulario con validaciones
+- **Inicio de sesión** - Modal elegante con UX moderna
+- **Gestión de sesiones** - Persistencia con localStorage
+- **Validaciones** - Email, contraseñas, usuarios únicos
+- **Usuarios de ejemplo** - Para facilitar pruebas
+- **Logout seguro** - Limpieza completa de datos
+- **Protección de rutas** - Acceso controlado a perfil
+
+### Funcionalidades Actuales ✅
+- 🎊 Creación de rifas personalizadas
+- 📊 Dashboard de usuario completo
+- 🗄️ Persistencia de rifas en localStorage
+- 🔔 Sistema de notificaciones visuales
+- 👤 Gestión completa de perfil de usuario
+- 🎯 Estadísticas de uso
 
 ### Próximas Funcionalidades
-- 🎊 Creación de rifas personalizadas (API)
-- 📊 Dashboard de usuario
-- 🗄️ Persistencia completa de rifas
-- 📧 Sistema de notificaciones
-- 🔗 Integración frontend-backend
+- 🔗 Integración con backend
+- 📧 Sistema de notificaciones por email
+- 🌐 Rifas públicas compartibles
+- 📊 Analytics avanzados
 
 ## 🔧 Comandos Útiles
 
@@ -150,21 +179,28 @@ npm test
 
 ## 🧪 Pruebas del Sistema
 
-El proyecto incluye un script de pruebas automatizado que verifica:
-- ✅ Conexión del servidor
-- ✅ Registro de usuarios
-- ✅ Login de usuarios  
-- ✅ Validación de tokens JWT
-- ✅ Protección de rutas
+### Frontend (Actual)
+- ✅ **Registro de usuarios** - Validaciones completas
+- ✅ **Login de usuarios** - Autenticación con localStorage
+- ✅ **Gestión de sesiones** - Persistencia y logout
+- ✅ **Creación de rifas** - Formularios y validaciones
+- ✅ **Responsividad** - Probado en móviles y desktop
+- ✅ **Usuarios de ejemplo** - admin/1234, demo/demo, estudiante1/1234
+
+### Backend (Disponible)
+- ✅ **API de autenticación JWT**
+- ✅ **Base de datos SQLite**
+- ✅ **Scripts de pruebas automatizados**
 
 ## 📚 Características Técnicas
 
 ### Seguridad Implementada:
-- **JWT tokens** - Autenticación sin estado
-- **bcryptjs** - Hash de contraseñas con salt
-- **Middleware de protección** - Rutas protegidas
-- **Validación de entrada** - Sanitización de datos
-- **Variables de entorno** - Configuración segura
+- **Validación de formularios** - Campos requeridos y formato
+- **Contraseñas seguras** - Mínimo 4 caracteres
+- **Usuarios únicos** - Validación de duplicados
+- **Emails válidos** - Verificación de formato
+- **Limpieza de sesiones** - Logout seguro
+- **Datos encapsulados** - localStorage organizado
 
 ### Arquitectura:
 - **API RESTful** - Endpoints bien estructurados
@@ -186,9 +222,38 @@ Este proyecto es parte del programa educativo Talento Tech curso NODE.JS.
 
 ⭐ **¿Te gusta el proyecto?** ¡Dale una estrella en GitHub!
 
+## 🐛 Problemas Resueltos
+
+- ✅ **Login automático** - Ya no se loguea solo
+- ✅ **Formularios de autenticación** - Modales elegantes
+- ✅ **Persistencia de sesión** - Funciona correctamente
+- ✅ **Validaciones completas** - Formularios seguros
+- ✅ **Usuarios de ejemplo** - Para facilitar pruebas
+- ✅ **Cache del navegador** - Sistema de datos limpio
+
 ## 🎯 Próximos Commits
 
-1. **API de Rifas** - CRUD completo para gestión de rifas
-2. **Integración Frontend** - Conectar interfaz con autenticación
-3. **Dashboard de Usuario** - Panel de control personalizado
-4. **Deploy a producción** - Subir a Heroku/Vercel
+1. **Integración Backend** - Conectar frontend con API
+2. **Rifas compartidas** - Sistema de códigos únicos
+3. **Notificaciones avanzadas** - Sistema de alertas
+4. **Deploy a producción** - Subir a Vercel/Netlify
+
+## 🎮 Instrucciones de Uso
+
+### Como Usuario Anónimo
+1. Abre `index.html` en tu navegador
+2. Usa el simulador sin registrarte
+3. Selecciona números y haz sorteos
+
+### Como Usuario Registrado  
+1. Click en "REGISTRARSE"
+2. Completa el formulario
+3. O usa: admin/1234, demo/demo, estudiante1/1234
+4. Accede a "Mi Perfil" para crear rifas personalizadas
+5. Gestiona tus simulaciones y estadísticas
+
+### Funciones Avanzadas
+- **Crear rifas:** Usa el formulario en "Mi Perfil"
+- **Gestionar rifas:** Edita o elimina tus simulaciones
+- **Ver estadísticas:** Revisa tu progreso de aprendizaje
+- **Limpiar datos:** Ejecuta `clearAllData()` en consola

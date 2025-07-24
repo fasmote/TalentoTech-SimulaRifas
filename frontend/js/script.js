@@ -8,79 +8,205 @@ let winnerNumber = null;
 
 // ===== FUNCIONES DE AUTENTICACIÓN =====
 
+// Variable global para el usuario actual
+let currentUser = null;
+
 /**
  * Verificar si el usuario está logueado
  * @returns {boolean} true si está logueado, false si no
  */
 function isUserLoggedIn() {
-    const isLoggedOut = sessionStorage.getItem('isLoggedOut');
-    return isLoggedOut !== 'true';
+    const userData = localStorage.getItem('currentUser');
+    if (userData) {
+        try {
+            currentUser = JSON.parse(userData);
+            return true;
+        } catch (error) {
+            localStorage.removeItem('currentUser');
+            return false;
+        }
+    }
+    return false;
 }
 
 /**
- * Iniciar sesión del usuario
+ * Mostrar modal de login
  */
-function login() {
-    // Limpiar estado de sesión cerrada
-    sessionStorage.removeItem('isLoggedOut');
+function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'flex';
+}
+
+/**
+ * Mostrar modal de registro
+ */
+function showRegisterModal() {
+    document.getElementById('registerModal').style.display = 'flex';
+}
+
+/**
+ * Cerrar modales de autenticación
+ */
+function closeAuthModal() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('registerModal').style.display = 'none';
     
-    // Mostrar sección de usuario y ocultar login
+    // Limpiar campos
+    clearAuthFields();
+}
+
+/**
+ * Limpiar campos de autenticación
+ */
+function clearAuthFields() {
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('registerUsername').value = '';
+    document.getElementById('registerEmail').value = '';
+    document.getElementById('registerPassword').value = '';
+    document.getElementById('registerConfirmPassword').value = '';
+}
+
+/**
+ * Cambiar de login a registro
+ */
+function switchToRegister() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('registerModal').style.display = 'flex';
+}
+
+/**
+ * Cambiar de registro a login
+ */
+function switchToLogin() {
+    document.getElementById('registerModal').style.display = 'none';
+    document.getElementById('loginModal').style.display = 'flex';
+}
+
+/**
+ * Realizar login
+ */
+function performLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    
+    if (!username || !password) {
+        showNotification('Por favor completa todos los campos', 'error');
+        return;
+    }
+    
+    // Simular autenticación (en una app real esto sería una llamada al backend)
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        // Login exitoso
+        currentUser = { username: user.username, email: user.email };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        updateAuthUI(true);
+        closeAuthModal();
+        showNotification(`¡Bienvenido de nuevo, ${currentUser.username}!`);
+    } else {
+        showNotification('Usuario o contraseña incorrectos', 'error');
+    }
+}
+
+/**
+ * Realizar registro
+ */
+function performRegister() {
+    const username = document.getElementById('registerUsername').value.trim();
+    const email = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value.trim();
+    const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+    
+    // Validaciones
+    if (!username || !email || !password || !confirmPassword) {
+        showNotification('Por favor completa todos los campos', 'error');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showNotification('Las contraseñas no coinciden', 'error');
+        return;
+    }
+    
+    if (password.length < 4) {
+        showNotification('La contraseña debe tener al menos 4 caracteres', 'error');
+        return;
+    }
+    
+    if (!email.includes('@')) {
+        showNotification('Por favor ingresa un email válido', 'error');
+        return;
+    }
+    
+    // Verificar si el usuario ya existe
+    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+    if (users.some(u => u.username === username)) {
+        showNotification('El nombre de usuario ya está en uso', 'error');
+        return;
+    }
+    
+    if (users.some(u => u.email === email)) {
+        showNotification('El email ya está registrado', 'error');
+        return;
+    }
+    
+    // Registrar nuevo usuario
+    const newUser = { username, email, password };
+    users.push(newUser);
+    localStorage.setItem('registeredUsers', JSON.stringify(users));
+    
+    // Login automático después del registro
+    currentUser = { username, email };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    updateAuthUI(true);
+    closeAuthModal();
+    showNotification(`¡Cuenta creada exitosamente! Bienvenido, ${username}!`);
+}
+
+/**
+ * Actualizar interfaz de autenticación
+ * @param {boolean} isLoggedIn - Si el usuario está logueado
+ */
+function updateAuthUI(isLoggedIn) {
     const userSection = document.getElementById('userSection');
     const loginSection = document.getElementById('loginSection');
-    const perfilNavItem = document.getElementById('perfilNavItem');
+    const userName = document.getElementById('userName');
     
-    if (userSection) {
-        userSection.style.display = 'flex';
+    if (isLoggedIn && currentUser) {
+        // Mostrar sección de usuario logueado
+        if (userSection) userSection.style.display = 'flex';
+        if (loginSection) loginSection.style.display = 'none';
+        if (userName) userName.textContent = currentUser.username;
+    } else {
+        // Mostrar sección de login
+        if (userSection) userSection.style.display = 'none';
+        if (loginSection) loginSection.style.display = 'flex';
     }
-    if (loginSection) {
-        loginSection.style.display = 'none';
-    }
-    if (perfilNavItem) {
-        perfilNavItem.style.display = 'block';
-    }
-    
-    // Mostrar notificación
-    showNotification('Bienvenido de nuevo!');
-    
-    console.log('Login completado - estado actualizado en sessionStorage');
 }
 
 /**
  * Cerrar sesión del usuario
  */
 function logout() {
-    // Mostrar confirmación
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
         // Limpiar datos del usuario
+        currentUser = null;
+        localStorage.removeItem('currentUser');
         userRifas = [];
         selectedNumbers = [];
         winnerNumber = null;
         
-        // Guardar estado de sesión cerrada ANTES de manipular la UI
-        sessionStorage.setItem('isLoggedOut', 'true');
-        
-        // Ocultar sección de usuario y mostrar login
-        const userSection = document.getElementById('userSection');
-        const loginSection = document.getElementById('loginSection');
-        const perfilNavItem = document.getElementById('perfilNavItem');
-        
-        if (userSection) {
-            userSection.style.display = 'none';
-        }
-        if (loginSection) {
-            loginSection.style.display = 'flex';
-        }
-        if (perfilNavItem) {
-            perfilNavItem.style.display = 'none';
-        }
+        // Actualizar interfaz
+        updateAuthUI(false);
         
         // Volver a la página de inicio
         navigateTo('demo');
         
-        // Mostrar notificación
         showNotification('Sesión cerrada exitosamente');
-        
-        console.log('Logout completado - estado guardado en sessionStorage');
     }
 }
 
@@ -849,9 +975,98 @@ function deleteRifa(rifaId) {
 // ===== INICIALIZACIÓN =====
 
 /**
+ * Inicializar datos de ejemplo (solo para desarrollo)
+ */
+function initializeExampleData() {
+    // Solo agregar datos de ejemplo si no existen usuarios
+    const existingUsers = localStorage.getItem('registeredUsers');
+    if (!existingUsers) {
+        const exampleUsers = [
+            {
+                username: 'admin',
+                email: 'admin@talento.tech',
+                password: '1234'
+            },
+            {
+                username: 'estudiante1',
+                email: 'estudiante1@talento.tech',
+                password: '1234'
+            },
+            {
+                username: 'demo',
+                email: 'demo@talento.tech',
+                password: 'demo'
+            }
+        ];
+        localStorage.setItem('registeredUsers', JSON.stringify(exampleUsers));
+        console.log('Usuarios de ejemplo creados: admin/1234, estudiante1/1234, demo/demo');
+    }
+}
+
+/**
+ * Limpiar todos los datos de la aplicación (solo para desarrollo)
+ */
+function clearAllData() {
+    if (confirm('Esta acción eliminará TODOS los datos (usuarios, rifas, etc.). ¿Estás seguro?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        currentUser = null;
+        userRifas = [];
+        selectedNumbers = [];
+        winnerNumber = null;
+        updateAuthUI(false);
+        navigateTo('demo');
+        showNotification('Todos los datos han sido eliminados');
+        console.log('Todos los datos eliminados');
+    }
+}
+
+/**
+ * Configurar event listeners para modales
+ */
+function setupModalEventListeners() {
+    // Cerrar modales con click fuera del contenido
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('auth-modal')) {
+            closeAuthModal();
+        }
+        if (event.target.classList.contains('winner-modal')) {
+            closeWinnerModal();
+        }
+    });
+    
+    // Cerrar modales con tecla Escape
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeAuthModal();
+            closeWinnerModal();
+        }
+    });
+    
+    // Enviar formularios con Enter
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            if (document.getElementById('loginModal').style.display === 'flex') {
+                event.preventDefault();
+                performLogin();
+            } else if (document.getElementById('registerModal').style.display === 'flex') {
+                event.preventDefault();
+                performRegister();
+            }
+        }
+    });
+}
+
+/**
  * Inicializar la aplicación cuando el DOM esté listo
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar datos de ejemplo
+    initializeExampleData();
+    
+    // Configurar event listeners para modales
+    setupModalEventListeners();
+    
     // Generar grilla inicial y actualizar interfaz
     generateNumbersGrid();
     updateCart();
@@ -860,44 +1075,19 @@ document.addEventListener('DOMContentLoaded', function() {
     checkSessionStatus();
     
     console.log('Simulador de Rifas inicializado - Talento Tech curso NODE.JS');
+    console.log('Usuarios disponibles: admin/1234, estudiante1/1234, demo/demo');
+    console.log('Para limpiar todos los datos, ejecuta: clearAllData()');
 });
 
 /**
  * Verificar y aplicar el estado de sesión guardado
  */
 function checkSessionStatus() {
-    const userSection = document.getElementById('userSection');
-    const loginSection = document.getElementById('loginSection');
-    const perfilNavItem = document.getElementById('perfilNavItem');
+    // Verificar si hay un usuario logueado
+    const isLoggedIn = isUserLoggedIn();
     
-    // Solo aplicar lógica de sesión si existen elementos de autenticación en la página
-    if (!userSection && !loginSection) {
-        console.log('No hay elementos de autenticación en esta página');
-        return;
-    }
+    // Actualizar la interfaz según el estado
+    updateAuthUI(isLoggedIn);
     
-    const isLoggedOut = sessionStorage.getItem('isLoggedOut');
-    
-    if (isLoggedOut === 'true') {
-        // Usuario deslogueado: ocultar sección de usuario y mostrar login
-        if (userSection) {
-            userSection.style.display = 'none';
-        }
-        if (loginSection) {
-            loginSection.style.display = 'flex';
-        }
-        if (perfilNavItem) {
-            perfilNavItem.style.display = 'none';
-        }
-    } else {
-        // Solo mostrar como logueado si hay elementos de usuario presentes
-        // Y no forzar login automático en páginas que no lo requieren
-        if (userSection && loginSection) {
-            userSection.style.display = 'flex';
-            loginSection.style.display = 'none';
-            if (perfilNavItem) {
-                perfilNavItem.style.display = 'block';
-            }
-        }
-    }
+    console.log('Estado de autenticación verificado:', isLoggedIn ? `Usuario: ${currentUser.username}` : 'No logueado');
 }

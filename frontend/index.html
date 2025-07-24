@@ -21,14 +21,15 @@
             </ul>
             
             <!-- Sección de usuario logueado -->
-            <div class="user-section" id="userSection" style="display: flex; align-items: center; gap: 15px;">
-                <span id="userName" style="color: #667eea; font-weight: 500;">claudio</span>
+            <div class="user-section" id="userSection" style="display: none; align-items: center; gap: 15px;">
+                <span id="userName" style="color: #667eea; font-weight: 500;"></span>
                 <button class="btn btn-primary" onclick="logout()" style="padding: 8px 16px; font-size: 0.9rem;">CERRAR SESIÓN</button>
             </div>
             
             <!-- Sección de usuario no logueado -->
-            <div class="login-section" id="loginSection" style="display: none; align-items: center; gap: 15px;">
-                <button class="btn btn-success" onclick="login()" style="padding: 8px 16px; font-size: 0.9rem;">INICIAR SESIÓN</button>
+            <div class="login-section" id="loginSection" style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn btn-success" onclick="showLoginModal()" style="padding: 8px 16px; font-size: 0.9rem;">INICIAR SESIÓN</button>
+                <button class="btn btn-secondary" onclick="showRegisterModal()" style="padding: 8px 16px; font-size: 0.9rem;">REGISTRARSE</button>
             </div>
             
             <!-- Botón para menú móvil -->
@@ -104,6 +105,48 @@
             </button>
             <button class="btn btn-primary" onclick="resetGame()" style="margin-left: 10px;">
                 🔄 Nueva Simulación
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE LOGIN ===== -->
+    <div class="auth-modal" id="loginModal" style="display: none;">
+        <div class="auth-content">
+            <h2>🔑 Iniciar Sesión</h2>
+            <div class="auth-form">
+                <input type="text" id="loginUsername" placeholder="Usuario" class="form-input">
+                <input type="password" id="loginPassword" placeholder="Contraseña" class="form-input">
+                <button class="btn btn-primary" onclick="performLogin()" style="width: 100%; margin-bottom: 10px;">
+                    Iniciar Sesión
+                </button>
+                <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                    ¿No tienes cuenta? <a href="#" onclick="switchToRegister()" style="color: #667eea;">Regístrate aquí</a>
+                </p>
+            </div>
+            <button class="btn btn-secondary" onclick="closeAuthModal()" style="width: 100%;">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE REGISTRO ===== -->
+    <div class="auth-modal" id="registerModal" style="display: none;">
+        <div class="auth-content">
+            <h2>👤 Crear Cuenta</h2>
+            <div class="auth-form">
+                <input type="text" id="registerUsername" placeholder="Usuario" class="form-input">
+                <input type="email" id="registerEmail" placeholder="Email" class="form-input">
+                <input type="password" id="registerPassword" placeholder="Contraseña" class="form-input">
+                <input type="password" id="registerConfirmPassword" placeholder="Confirmar Contraseña" class="form-input">
+                <button class="btn btn-success" onclick="performRegister()" style="width: 100%; margin-bottom: 10px;">
+                    Crear Cuenta
+                </button>
+                <p style="text-align: center; color: #666; font-size: 0.9rem;">
+                    ¿Ya tienes cuenta? <a href="#" onclick="switchToLogin()" style="color: #667eea;">Inicia sesión</a>
+                </p>
+            </div>
+            <button class="btn btn-secondary" onclick="closeAuthModal()" style="width: 100%;">
+                Cancelar
             </button>
         </div>
     </div>
