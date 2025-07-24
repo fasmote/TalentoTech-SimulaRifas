@@ -111,6 +111,51 @@
         </div>
     </div>
 
+    <!-- ===== MODALES DE AUTENTICACIÓN =====
+    <!-- Modal de Login -->
+    <div class="auth-modal" id="loginModal" style="display: none;">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2>🔐 Iniciar Sesión</h2>
+                <button class="auth-close-btn" onclick="closeAuthModal()">×</button>
+            </div>
+            <div class="auth-modal-body">
+                <div class="auth-form">
+                    <input type="text" id="loginUsername" placeholder="Nombre de usuario" class="auth-input">
+                    <input type="password" id="loginPassword" placeholder="Contraseña" class="auth-input">
+                    <button onclick="performLogin()" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
+                </div>
+                <div class="auth-divider">
+                    <span>¿No tienes cuenta?</span>
+                </div>
+                <button onclick="switchToRegister()" class="btn btn-secondary" style="width: 100%;">Crear Cuenta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div class="auth-modal" id="registerModal" style="display: none;">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h2>📝 Crear Cuenta</h2>
+                <button class="auth-close-btn" onclick="closeAuthModal()">×</button>
+            </div>
+            <div class="auth-modal-body">
+                <div class="auth-form">
+                    <input type="text" id="registerUsername" placeholder="Nombre de usuario" class="auth-input">
+                    <input type="email" id="registerEmail" placeholder="Email" class="auth-input">
+                    <input type="password" id="registerPassword" placeholder="Contraseña" class="auth-input">
+                    <input type="password" id="registerConfirmPassword" placeholder="Confirmar contraseña" class="auth-input">
+                    <button onclick="performRegister()" class="btn btn-success" style="width: 100%;">Crear Cuenta</button>
+                </div>
+                <div class="auth-divider">
+                    <span>¿Ya tienes cuenta?</span>
+                </div>
+                <button onclick="switchToLogin()" class="btn btn-secondary" style="width: 100%;">Iniciar Sesión</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== SCRIPTS ===== -->
     <script src="js/script.js"></script>
 </body>

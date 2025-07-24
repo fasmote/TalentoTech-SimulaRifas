@@ -1,32 +1,63 @@
+// ===== CONFIGURACIÓN DEL BACKEND =====
+const API_BASE_URL = 'http://localhost:3000/api';
+
 // ===== VARIABLES GLOBALES =====
-// Array global para almacenar rifas creadas por el usuario
 let userRifas = [];
-// Array para números seleccionados en la simulación actual
 let selectedNumbers = [];
-// Variable para almacenar el número ganador
 let winnerNumber = null;
-
-// ===== FUNCIONES DE AUTENTICACIÓN =====
-
-// Variable global para el usuario actual
 let currentUser = null;
+let authToken = localStorage.getItem('authToken');
+
+// ===== FUNCIONES DE AUTENTICACIÓN CON BACKEND =====
 
 /**
  * Verificar si el usuario está logueado
  * @returns {boolean} true si está logueado, false si no
  */
 function isUserLoggedIn() {
-    const userData = localStorage.getItem('currentUser');
-    if (userData) {
-        try {
-            currentUser = JSON.parse(userData);
+    return authToken && currentUser;
+}
+
+/**
+ * Verificar token y obtener usuario actual del backend
+ */
+async function checkSessionStatus() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        updateAuthUI(false);
+        return false;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            currentUser = data.data;
+            authToken = token;
+            updateAuthUI(true);
+            await loadUserRifas(); // Cargar rifas del usuario
             return true;
-        } catch (error) {
-            localStorage.removeItem('currentUser');
+        } else {
+            // Token inválido
+            localStorage.removeItem('authToken');
+            authToken = null;
+            currentUser = null;
+            updateAuthUI(false);
             return false;
         }
+    } catch (error) {
+        console.error('Error verificando sesión:', error);
+        // Si no puede conectar al backend, mantener UI de no logueado
+        updateAuthUI(false);
+        return false;
     }
-    return false;
 }
 
 /**
@@ -49,8 +80,6 @@ function showRegisterModal() {
 function closeAuthModal() {
     document.getElementById('loginModal').style.display = 'none';
     document.getElementById('registerModal').style.display = 'none';
-    
-    // Limpiar campos
     clearAuthFields();
 }
 
@@ -83,9 +112,9 @@ function switchToLogin() {
 }
 
 /**
- * Realizar login
+ * Realizar login con backend
  */
-function performLogin() {
+async function performLogin() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
     
@@ -94,33 +123,54 @@ function performLogin() {
         return;
     }
     
-    // Simular autenticación (en una app real esto sería una llamada al backend)
-    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-        // Login exitoso
-        currentUser = { username: user.username, email: user.email };
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    try {
+        showNotification('Iniciando sesión...', 'info');
         
-        updateAuthUI(true);
-        closeAuthModal();
-        showNotification(`¡Bienvenido de nuevo, ${currentUser.username}!`);
-    } else {
-        showNotification('Usuario o contraseña incorrectos', 'error');
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Login exitoso
+            authToken = data.token;
+            currentUser = data.user;
+            
+            // Guardar token en localStorage
+            localStorage.setItem('authToken', authToken);
+            
+            updateAuthUI(true);
+            closeAuthModal();
+            
+            // Cargar rifas del usuario
+            await loadUserRifas();
+            
+            showNotification(`¡Bienvenido de nuevo, ${currentUser.username}!`);
+        } else {
+            showNotification(data.message || 'Error en el login', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error en login:', error);
+        showNotification('Error conectando al servidor. ¿Está ejecutándose el backend?', 'error');
     }
 }
 
 /**
- * Realizar registro
+ * Realizar registro con backend
  */
-function performRegister() {
+async function performRegister() {
     const username = document.getElementById('registerUsername').value.trim();
     const email = document.getElementById('registerEmail').value.trim();
     const password = document.getElementById('registerPassword').value.trim();
     const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
     
-    // Validaciones
+    // Validaciones del frontend
     if (!username || !email || !password || !confirmPassword) {
         showNotification('Por favor completa todos los campos', 'error');
         return;
@@ -141,30 +191,39 @@ function performRegister() {
         return;
     }
     
-    // Verificar si el usuario ya existe
-    const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-    if (users.some(u => u.username === username)) {
-        showNotification('El nombre de usuario ya está en uso', 'error');
-        return;
+    try {
+        showNotification('Creando cuenta...', 'info');
+        
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Registro exitoso - hacer login automático
+            authToken = data.token;
+            currentUser = data.user;
+            
+            // Guardar token en localStorage
+            localStorage.setItem('authToken', authToken);
+            
+            updateAuthUI(true);
+            closeAuthModal();
+            
+            showNotification(`¡Cuenta creada exitosamente! Bienvenido, ${username}!`);
+        } else {
+            showNotification(data.message || 'Error en el registro', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error en registro:', error);
+        showNotification('Error conectando al servidor. ¿Está ejecutándose el backend?', 'error');
     }
-    
-    if (users.some(u => u.email === email)) {
-        showNotification('El email ya está registrado', 'error');
-        return;
-    }
-    
-    // Registrar nuevo usuario
-    const newUser = { username, email, password };
-    users.push(newUser);
-    localStorage.setItem('registeredUsers', JSON.stringify(users));
-    
-    // Login automático después del registro
-    currentUser = { username, email };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    updateAuthUI(true);
-    closeAuthModal();
-    showNotification(`¡Cuenta creada exitosamente! Bienvenido, ${username}!`);
 }
 
 /**
@@ -175,27 +234,46 @@ function updateAuthUI(isLoggedIn) {
     const userSection = document.getElementById('userSection');
     const loginSection = document.getElementById('loginSection');
     const userName = document.getElementById('userName');
+    const perfilNavItem = document.getElementById('perfilNavItem');
     
     if (isLoggedIn && currentUser) {
         // Mostrar sección de usuario logueado
         if (userSection) userSection.style.display = 'flex';
         if (loginSection) loginSection.style.display = 'none';
         if (userName) userName.textContent = currentUser.username;
+        if (perfilNavItem) perfilNavItem.style.display = 'block';
     } else {
         // Mostrar sección de login
         if (userSection) userSection.style.display = 'none';
         if (loginSection) loginSection.style.display = 'flex';
+        if (perfilNavItem) perfilNavItem.style.display = 'none';
     }
 }
 
 /**
  * Cerrar sesión del usuario
  */
-function logout() {
+async function logout() {
     if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-        // Limpiar datos del usuario
+        try {
+            // Notificar al backend (opcional)
+            if (authToken) {
+                await fetch(`${API_BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
+        } catch (error) {
+            console.log('Error notificando logout al backend:', error);
+        }
+        
+        // Limpiar datos locales
         currentUser = null;
-        localStorage.removeItem('currentUser');
+        authToken = null;
+        localStorage.removeItem('authToken');
         userRifas = [];
         selectedNumbers = [];
         winnerNumber = null;
@@ -210,28 +288,248 @@ function logout() {
     }
 }
 
-// ===== FUNCIONES DE NAVEGACIÓN =====
+// ===== FUNCIONES DE RIFAS CON BACKEND =====
 
 /**
- * Alternar visibilidad del menú móvil
+ * Cargar rifas del usuario desde el backend
  */
+async function loadUserRifas() {
+    if (!authToken) {
+        userRifas = [];
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/rifas/my`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            userRifas = data.data.map(rifa => ({
+                id: rifa.id,
+                title: rifa.title,
+                description: rifa.description || '',
+                price: rifa.price_per_number || 0,
+                sold: [], // Los números se cargan por separado si es necesario
+                created: new Date(rifa.created_at).toLocaleDateString('es-ES'),
+                status: rifa.status,
+                winner_number: rifa.winner_number
+            }));
+            
+            console.log(`${userRifas.length} rifas cargadas desde el backend`);
+        } else {
+            console.error('Error cargando rifas del usuario');
+            userRifas = [];
+        }
+    } catch (error) {
+        console.error('Error cargando rifas:', error);
+        userRifas = [];
+    }
+}
+
+/**
+ * Crear nueva rifa en el backend
+ */
+async function createNewRifa() {
+    if (!authToken) {
+        showNotification('Debes iniciar sesión para crear una rifa', 'error');
+        return;
+    }
+    
+    const titleElement = document.getElementById('rifaTitle');
+    const descriptionElement = document.getElementById('rifaDescription');
+    const priceElement = document.getElementById('rifaPrice');
+    
+    if (!titleElement || !descriptionElement || !priceElement) {
+        showNotification('Error: No se encontraron los campos del formulario', 'error');
+        return;
+    }
+    
+    const title = titleElement.value.trim();
+    const description = descriptionElement.value.trim();
+    const price = parseFloat(priceElement.value) || 0;
+    
+    if (!title || !description) {
+        showNotification('Por favor completa título y descripción', 'error');
+        return;
+    }
+    
+    try {
+        showNotification('Creando rifa...', 'info');
+        
+        const response = await fetch(`${API_BASE_URL}/rifas`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title,
+                description: description,
+                price_per_number: price > 0 ? price : null
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Rifa creada exitosamente
+            const nuevaRifa = {
+                id: data.data.id,
+                title: data.data.title,
+                description: data.data.description || '',
+                price: data.data.price_per_number || 0,
+                sold: [],
+                created: new Date(data.data.created_at).toLocaleDateString('es-ES'),
+                status: data.data.status
+            };
+            
+            userRifas.push(nuevaRifa);
+            
+            // Limpiar formulario
+            titleElement.value = '';
+            descriptionElement.value = '';
+            priceElement.value = '';
+            
+            // Actualizar interfaz
+            updateUserRifasList();
+            
+            // Actualizar estadísticas
+            const statNumber = document.querySelector('.stat-card:nth-child(2) .stat-number');
+            if (statNumber) {
+                statNumber.textContent = userRifas.length;
+            }
+            
+            showNotification(`¡Rifa "${title}" creada exitosamente!`);
+        } else {
+            showNotification(data.message || 'Error creando la rifa', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error creando rifa:', error);
+        showNotification('Error conectando al servidor', 'error');
+    }
+}
+
+/**
+ * Eliminar rifa del backend
+ */
+async function deleteRifa(rifaId) {
+    if (!authToken) {
+        showNotification('Debes iniciar sesión', 'error');
+        return;
+    }
+    
+    if (confirm('¿Estás seguro de que quieres eliminar esta rifa?')) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/rifas/${rifaId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Eliminar de la lista local
+                userRifas = userRifas.filter(r => r.id !== rifaId);
+                updateUserRifasList();
+                
+                // Actualizar estadísticas
+                const statNumber = document.querySelector('.stat-card:nth-child(2) .stat-number');
+                if (statNumber) {
+                    statNumber.textContent = userRifas.length;
+                }
+                
+                showNotification('Rifa eliminada exitosamente!');
+            } else {
+                showNotification(data.message || 'Error eliminando la rifa', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Error eliminando rifa:', error);
+            showNotification('Error conectando al servidor', 'error');
+        }
+    }
+}
+
+/**
+ * Editar rifa en el backend
+ */
+async function editRifa(rifaId) {
+    if (!authToken) {
+        showNotification('Debes iniciar sesión', 'error');
+        return;
+    }
+    
+    const rifa = userRifas.find(r => r.id === rifaId);
+    if (!rifa) return;
+    
+    const newTitle = prompt('Nuevo título:', rifa.title);
+    if (newTitle === null) return;
+    
+    const newDescription = prompt('Nueva descripción:', rifa.description);
+    if (newDescription === null) return;
+    
+    const newPrice = prompt('Nuevo precio por número (0 para gratis):', rifa.price);
+    if (newPrice === null) return;
+    
+    if (newTitle && newDescription) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/rifas/${rifaId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: newTitle,
+                    description: newDescription,
+                    price_per_number: parseFloat(newPrice) || null
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Actualizar en la lista local
+                rifa.title = newTitle;
+                rifa.description = newDescription;
+                rifa.price = parseFloat(newPrice) || 0;
+                updateUserRifasList();
+                showNotification('Rifa actualizada exitosamente!');
+            } else {
+                showNotification(data.message || 'Error actualizando la rifa', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Error editando rifa:', error);
+            showNotification('Error conectando al servidor', 'error');
+        }
+    }
+}
+
+// ===== FUNCIONES DE NAVEGACIÓN (sin cambios) =====
+
 function toggleMobileMenu() {
     const navLinks = document.getElementById('navLinks');
     navLinks.classList.toggle('active');
 }
 
-/**
- * Navegar entre diferentes páginas de la aplicación
- * @param {string} page - Nombre de la página a mostrar
- */
 function navigateTo(page) {
-    // Verificar si el usuario intenta acceder al perfil sin estar logueado
     if (page === 'perfil' && !isUserLoggedIn()) {
         showNotification('Debes iniciar sesión para acceder a tu perfil', 'error');
+        showLoginModal();
         return;
     }
     
-    // Simular navegación SPA (Single Page Application)
     switch(page) {
         case 'rifas':
             showRifasPage();
@@ -247,34 +545,20 @@ function navigateTo(page) {
             break;
     }
     
-    // Cerrar menú móvil después de navegar
     document.getElementById('navLinks').classList.remove('active');
 }
 
-/**
- * Actualizar el estado activo en la navegación
- * @param {string} activePage - Página actualmente activa
- */
 function updateActiveNav(activePage) {
-    // Remover clase active de todos los enlaces
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.classList.remove('active');
     });
     
-    // Activar el enlace correspondiente
     let pageIndex;
     switch(activePage) {
-        case 'demo':
-            pageIndex = 0;
-            break;
-        case 'rifas':
-            pageIndex = 1;
-            break;
-        case 'perfil':
-            pageIndex = 2;
-            break;
-        default:
-            pageIndex = 0;
+        case 'demo': pageIndex = 0; break;
+        case 'rifas': pageIndex = 1; break;
+        case 'perfil': pageIndex = 2; break;
+        default: pageIndex = 0;
     }
     
     const navLinks = document.querySelectorAll('.nav-links a');
@@ -285,9 +569,6 @@ function updateActiveNav(activePage) {
 
 // ===== FUNCIONES DE PÁGINAS =====
 
-/**
- * Mostrar página de simulaciones públicas
- */
 function showRifasPage() {
     document.querySelector('.container').innerHTML = `
         <div class="page-header">
@@ -295,55 +576,25 @@ function showRifasPage() {
             <p class="subtitle">Ejemplos desarrollados en Talento Tech curso NODE.JS</p>
         </div>
         
-        <!-- Información sobre el propósito educativo -->
         <div style="background: rgba(255,255,255,0.9); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
             <p style="margin: 0; color: #666; font-style: italic;">
-                🎯 <strong>Proyecto Educativo Talento Tech curso NODE.JS</strong> - Simulaciones para aprender desarrollo backend
+                🎯 <strong>Proyecto Educativo Talento Tech curso NODE.JS</strong> - Simulaciones con backend real
             </p>
         </div>
         
-        <!-- Grid de rifas de ejemplo -->
         <div class="rifas-grid">
             <div class="rifa-card">
                 <div class="rifa-image">🎮</div>
                 <h3>PlayStation 5</h3>
-                <p class="rifa-description">Ejemplo de simulación para evento gaming</p>
+                <p class="rifa-description">Ejemplo de simulación con backend</p>
                 <div class="rifa-progress">
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: 65%"></div>
                     </div>
                     <span class="progress-text">65/100 números seleccionados</span>
                 </div>
-                <div class="rifa-price" style="color: #2196f3;">Simulación educativa</div>
+                <div class="rifa-price" style="color: #2196f3;">Con persistencia de datos</div>
                 <button class="btn btn-primary" onclick="showRifaDetail('ps5')">Ver Simulación</button>
-            </div>
-            
-            <div class="rifa-card">
-                <div class="rifa-image">📱</div>
-                <h3>iPhone 15 Pro</h3>
-                <p class="rifa-description">Ejemplo de aplicación Node.js con base de datos</p>
-                <div class="rifa-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 30%"></div>
-                    </div>
-                    <span class="progress-text">30/100 números seleccionados</span>
-                </div>
-                <div class="rifa-price" style="color: #2196f3;">Demo Backend</div>
-                <button class="btn btn-primary" onclick="showRifaDetail('iphone')">Ver Simulación</button>
-            </div>
-            
-            <div class="rifa-card">
-                <div class="rifa-image">🛏️</div>
-                <h3>Set de Toallas y Sábanas</h3>
-                <p class="rifa-description">Práctica de CRUD con Express y SQLite</p>
-                <div class="rifa-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 45%"></div>
-                    </div>
-                    <span class="progress-text">45/100 números seleccionados</span>
-                </div>
-                <div class="rifa-price" style="color: #2196f3;">Ejercicio práctico</div>
-                <button class="btn btn-primary" onclick="showRifaDetail('textiles')">Ver Simulación</button>
             </div>
             
             ${generateUserRifasHTML()}
@@ -353,14 +604,8 @@ function showRifasPage() {
             <button class="btn btn-secondary" onclick="navigateTo('demo')">← Volver al Inicio</button>
         </div>
     `;
-    
-    console.log('Página de Simulaciones Públicas cargada. Simulaciones de usuario:', userRifas.length);
 }
 
-/**
- * Generar HTML para rifas creadas por el usuario
- * @returns {string} HTML de las rifas del usuario
- */
 function generateUserRifasHTML() {
     return userRifas.map(rifa => `
         <div class="rifa-card">
@@ -373,15 +618,12 @@ function generateUserRifasHTML() {
                 </div>
                 <span class="progress-text">${rifa.sold.length}/100 números seleccionados</span>
             </div>
-            <div class="rifa-price" style="color: #2196f3;">Código: ${rifa.accessCode}</div>
+            <div class="rifa-price" style="color: #2196f3;">ID: ${rifa.id} - ${rifa.status}</div>
             <button class="btn btn-primary" onclick="showRifaDetail('user_${rifa.id}')">Ver Simulación</button>
         </div>
     `).join('');
 }
 
-/**
- * Mostrar página de perfil del usuario
- */
 function showPerfilPage() {
     document.querySelector('.container').innerHTML = `
         <div class="page-header">
@@ -390,9 +632,8 @@ function showPerfilPage() {
         </div>
         
         <div class="profile-content">
-            <!-- Estadísticas del estudiante -->
             <div class="profile-section">
-                <h3>📊 Mis Estadísticas de Aprendizaje</h3>
+                <h3>📊 Mis Estadísticas</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number">5</div>
@@ -400,57 +641,32 @@ function showPerfilPage() {
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${userRifas.length}</div>
-                        <div class="stat-label">Proyectos Creados</div>
+                        <div class="stat-label">Rifas Creadas</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">1</div>
-                        <div class="stat-label">Módulos Completados</div>
+                        <div class="stat-label">Backend Conectado ✅</div>
                     </div>
                 </div>
             </div>
             
-            <!-- Historial de simulaciones -->
             <div class="profile-section">
-                <h3>🎫 Mis Simulaciones de Práctica</h3>
-                <div class="user-numbers">
-                    <div class="number-entry">
-                        <span class="rifa-name">PlayStation 5</span>
-                        <span class="user-number">Número 23</span>
-                        <span class="status active">Practicado</span>
-                    </div>
-                    <div class="number-entry">
-                        <span class="rifa-name">iPhone 15 Pro</span>
-                        <span class="user-number">Número 67</span>
-                        <span class="status active">Practicado</span>
-                    </div>
-                    <div class="number-entry">
-                        <span class="rifa-name">Ejercicio Anterior</span>
-                        <span class="user-number">Número 45</span>
-                        <span class="status winner">¡Ganador!</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Formulario para crear nueva simulación -->
-            <div class="profile-section">
-                <h3>➕ Crear Nueva Simulación de Práctica</h3>
+                <h3>➕ Crear Nueva Rifa</h3>
                 <p style="color: #666; margin-bottom: 15px; font-style: italic;">
-                    🎯 Practica creando tus propias simulaciones con Talento Tech curso NODE.JS
+                    🎯 Crea rifas reales que se guardan en la base de datos
                 </p>
                 <div class="create-rifa-form">
-                    <input type="text" placeholder="Título del proyecto (ej: Mi Primera Rifa TT NODE.JS)" class="form-input" id="rifaTitle">
-                    <textarea placeholder="Descripción de la simulación o premio" class="form-textarea" id="rifaDescription"></textarea>
-                    <input type="text" placeholder="Código de acceso (ej: FIESTA2025, EVENTO123)" class="form-input" id="rifaAccessCode">
-                    <small style="color: #666; font-style: italic;">El código permite que otros usuarios se unan a tu simulación</small>
-                    <button type="button" class="btn btn-success" onclick="createNewRifa()">Crear Simulación</button>
+                    <input type="text" placeholder="Título de la rifa" class="form-input" id="rifaTitle">
+                    <textarea placeholder="Descripción del premio" class="form-textarea" id="rifaDescription"></textarea>
+                    <input type="number" placeholder="Precio por número (opcional)" class="form-input" id="rifaPrice" min="0" step="0.01">
+                    <button type="button" class="btn btn-success" onclick="createNewRifa()">Crear Rifa</button>
                 </div>
             </div>
             
-            <!-- Lista de simulaciones creadas -->
             <div class="profile-section" id="userRifasSection">
-                <h3>🎯 Mis Simulaciones Creadas</h3>
+                <h3>🎯 Mis Rifas Creadas</h3>
                 <div id="userRifasList">
-                    ${userRifas.length === 0 ? '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna simulación aún</p>' : ''}
+                    ${userRifas.length === 0 ? '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna rifa aún</p>' : ''}
                 </div>
             </div>
         </div>
@@ -460,17 +676,46 @@ function showPerfilPage() {
         </div>
     `;
     
-    // Actualizar la lista de rifas después de cargar la página
     setTimeout(() => {
         updateUserRifasList();
     }, 100);
 }
 
-/**
- * Mostrar página principal de demostración
- */
+function updateUserRifasList() {
+    const userRifasList = document.getElementById('userRifasList');
+    
+    if (!userRifasList) {
+        return;
+    }
+    
+    if (userRifas.length === 0) {
+        userRifasList.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna rifa aún</p>';
+        return;
+    }
+    
+    userRifasList.innerHTML = userRifas.map(rifa => `
+        <div class="user-rifa-card">
+            <div class="user-rifa-header">
+                <h4>${rifa.title}</h4>
+                <span class="rifa-date">Creada: ${rifa.created}</span>
+            </div>
+            <p class="user-rifa-description">${rifa.description}</p>
+            <div class="user-rifa-stats">
+                <span class="stat-item">💰 ${rifa.price > 0 ? `$${rifa.price}` : 'Gratis'} por número</span>
+                <span class="stat-item">📊 ID: ${rifa.id}</span>
+                <span class="stat-item">🎯 Estado: ${rifa.status}</span>
+            </div>
+            <div class="user-rifa-actions">
+                <button class="btn btn-secondary btn-small" onclick="editRifa(${rifa.id})">✏️ Editar</button>
+                <button class="btn btn-primary btn-small" onclick="deleteRifa(${rifa.id})">🗑️ Eliminar</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ===== FUNCIONES DE JUEGO (sin cambios) =====
+
 function showDemoPage() {
-    // Restaurar contenido original de la demo
     document.querySelector('.container').innerHTML = `
         <header>
             <h1>🎲 Simulador de Rifas</h1>
@@ -516,132 +761,16 @@ function showDemoPage() {
         </div>
     `;
     
-    // Reinicializar la funcionalidad de la demo
     selectedNumbers = [];
     winnerNumber = null;
     generateNumbersGrid();
     updateCart();
 }
 
-/**
- * Mostrar detalle de una rifa específica
- * @param {string} rifaId - ID de la rifa a mostrar
- */
-function showRifaDetail(rifaId) {
-    // Datos predefinidos para las rifas de ejemplo
-    const rifaData = {
-        'ps5': { name: 'PlayStation 5', accessCode: 'GAMING2025', sold: [12, 23, 45, 67, 89] },
-        'iphone': { name: 'iPhone 15 Pro', accessCode: 'BACKEND2025', sold: [5, 18, 34, 56, 78] },
-        'textiles': { name: 'Set de Toallas y Sábanas', accessCode: 'PRACTICA2025', sold: [3, 15, 27, 41, 58, 73, 86] }
-    };
-    
-    let rifa;
-    
-    // Verificar si es una rifa creada por el usuario
-    if (rifaId.startsWith('user_')) {
-        const userRifaId = parseInt(rifaId.replace('user_', ''));
-        const userRifa = userRifas.find(r => r.id === userRifaId);
-        if (userRifa) {
-            rifa = {
-                name: userRifa.title,
-                accessCode: userRifa.accessCode,
-                sold: userRifa.sold
-            };
-        }
-    } else {
-        rifa = rifaData[rifaId];
-    }
-    
-    if (!rifa) {
-        showNotification('Simulación no encontrada', 'error');
-        return;
-    }
-    
-    // Generar HTML para la página de detalle
-    document.querySelector('.container').innerHTML = `
-        <div class="page-header">
-            <h1>🎯 ${rifa.name}</h1>
-            <p class="subtitle">Código de acceso: ${rifa.accessCode}</p>
-        </div>
-        
-        <div class="rifa-detail-content">
-            <div class="numbers-section">
-                <h3>Selecciona números para practicar</h3>
-                <div class="numbers-grid" id="rifaNumbersGrid">
-                    <!-- Los números se generan con JavaScript -->
-                </div>
-            </div>
-            
-            <div class="rifa-info">
-                <h3>Información de la Simulación</h3>
-                <p><strong>Proyecto:</strong> ${rifa.name}</p>
-                <p><strong>Código:</strong> ${rifa.accessCode}</p>
-                <p><strong>Números simulados:</strong> ${rifa.sold.length}/100</p>
-                <p><strong>Curso:</strong> Talento Tech curso NODE.JS</p>
-                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;">
-                    Practicar con Números Seleccionados
-                </button>
-            </div>
-        </div>
-        
-        <div class="back-buttons">
-            <button class="btn btn-secondary" onclick="navigateTo('rifas')">← Volver a Simulaciones</button>
-            <button class="btn btn-secondary" onclick="navigateTo('demo')">Ir al Inicio</button>
-        </div>
-    `;
-    
-    // Generar grilla de números con algunos ya "vendidos" para la demo
-    generateRifaGrid(rifa.sold);
-}
-
-// ===== FUNCIONES DE GENERACIÓN DE GRILLAS =====
-
-/**
- * Generar grilla de números para rifas con números ya vendidos
- * @param {Array} soldNumbers - Array de números ya vendidos
- */
-function generateRifaGrid(soldNumbers) {
-    const grid = document.getElementById('rifaNumbersGrid');
-    grid.innerHTML = '';
-    
-    for (let i = 0; i <= 99; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'number-cell';
-        cell.textContent = i.toString().padStart(2, '0'); // Formato 00, 01, 02...
-        
-        if (soldNumbers.includes(i)) {
-            // Número ya vendido/seleccionado
-            cell.classList.add('sold');
-            cell.style.background = '#ff6b6b';
-            cell.style.color = 'white';
-            cell.style.cursor = 'not-allowed';
-            cell.title = 'Número ya seleccionado en la simulación';
-        } else {
-            // Número disponible
-            cell.onclick = () => toggleRifaNumber(i);
-        }
-        
-        cell.id = `rifa-number-${i}`;
-        grid.appendChild(cell);
-    }
-}
-
-/**
- * Alternar selección de número en rifa
- * @param {number} number - Número a alternar
- */
-function toggleRifaNumber(number) {
-    const cell = document.getElementById(`rifa-number-${number}`);
-    if (cell && !cell.classList.contains('sold')) {
-        cell.classList.toggle('selected');
-    }
-}
-
-/**
- * Generar la grilla principal de números (0-99)
- */
 function generateNumbersGrid() {
     const grid = document.getElementById('numbersGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     for (let i = 0; i <= 99; i++) {
@@ -654,22 +783,14 @@ function generateNumbersGrid() {
     }
 }
 
-// ===== FUNCIONES DE JUEGO =====
-
-/**
- * Alternar selección de un número
- * @param {number} number - Número a alternar (0-99)
- */
 function toggleNumber(number) {
     const cell = document.getElementById(`number-${number}`);
     const index = selectedNumbers.indexOf(number);
     
     if (index > -1) {
-        // Deseleccionar número
         selectedNumbers.splice(index, 1);
         cell.classList.remove('selected');
     } else {
-        // Seleccionar número
         selectedNumbers.push(number);
         cell.classList.add('selected');
     }
@@ -677,17 +798,12 @@ function toggleNumber(number) {
     updateCart();
 }
 
-/**
- * Actualizar vista del carrito con números seleccionados
- */
 function updateCart() {
     const cartItems = document.getElementById('cartItems');
     const cartCount = document.getElementById('cartCount');
     
-    // Verificar que los elementos existen (para evitar errores en otras páginas)
     if (!cartItems || !cartCount) return;
     
-    // Actualizar contador
     cartCount.textContent = selectedNumbers.length;
     
     if (selectedNumbers.length === 0) {
@@ -695,7 +811,6 @@ function updateCart() {
         return;
     }
     
-    // Ordenar números y mostrarlos
     const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b);
     cartItems.innerHTML = sortedNumbers.map(number => `
         <div class="cart-item">
@@ -705,9 +820,6 @@ function updateCart() {
     `).join('');
 }
 
-/**
- * Seleccionar un número al azar
- */
 function selectRandomNumber() {
     const randomNumber = Math.floor(Math.random() * 100);
     
@@ -718,11 +830,7 @@ function selectRandomNumber() {
     }
 }
 
-/**
- * Limpiar toda la selección
- */
 function clearSelection() {
-    // Remover clases de todos los números seleccionados
     selectedNumbers.forEach(number => {
         const cell = document.getElementById(`number-${number}`);
         if (cell) {
@@ -730,28 +838,22 @@ function clearSelection() {
         }
     });
     
-    // Limpiar arrays y variables
     selectedNumbers = [];
     winnerNumber = null;
     updateCart();
     
-    // Cerrar modal si está abierto
     const winnerModal = document.getElementById('winnerModal');
     if (winnerModal) {
         winnerModal.style.display = 'none';
     }
 }
 
-/**
- * Realizar sorteo y determinar ganador
- */
 function drawWinner() {
     if (selectedNumbers.length === 0) {
         showNotification('¡Primero debes seleccionar al menos un número!', 'error');
         return;
     }
 
-    // Limpiar ganador anterior
     if (winnerNumber !== null) {
         const prevWinnerCell = document.getElementById(`number-${winnerNumber}`);
         if (prevWinnerCell) {
@@ -759,17 +861,14 @@ function drawWinner() {
         }
     }
 
-    // Seleccionar ganador al azar de los números seleccionados
     const randomIndex = Math.floor(Math.random() * selectedNumbers.length);
     winnerNumber = selectedNumbers[randomIndex];
     
-    // Mostrar animación de ganador
     const winnerCell = document.getElementById(`number-${winnerNumber}`);
     if (winnerCell) {
         winnerCell.classList.add('winner');
     }
     
-    // Mostrar modal con resultado
     const winnerModal = document.getElementById('winnerModal');
     if (winnerModal) {
         const winnerDisplay = document.getElementById('winnerNumber');
@@ -781,9 +880,6 @@ function drawWinner() {
     }
 }
 
-/**
- * Cerrar modal de ganador
- */
 function closeWinnerModal() {
     const winnerModal = document.getElementById('winnerModal');
     if (winnerModal) {
@@ -791,9 +887,6 @@ function closeWinnerModal() {
     }
 }
 
-/**
- * Resetear juego completo
- */
 function resetGame() {
     clearSelection();
     closeWinnerModal();
@@ -801,231 +894,36 @@ function resetGame() {
 
 // ===== FUNCIONES DE UTILIDAD =====
 
-/**
- * Mostrar notificación temporal
- * @param {string} message - Mensaje a mostrar
- * @param {string} type - Tipo de notificación ('success' o 'error')
- */
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
-    notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+    notification.className = `notification ${type === 'error' ? 'error' : type === 'info' ? 'info' : ''}`;
     notification.textContent = message;
     
     document.body.appendChild(notification);
     
-    // Remover después de 3 segundos
     setTimeout(() => {
         notification.remove();
     }, 3000);
 }
 
-// ===== FUNCIONES DE GESTIÓN DE RIFAS DE USUARIO =====
-
-/**
- * Crear nueva rifa/simulación
- */
-function createNewRifa() {
-    console.log('Creando nueva simulación...');
-    
-    // Obtener elementos del formulario
-    const titleElement = document.getElementById('rifaTitle');
-    const descriptionElement = document.getElementById('rifaDescription');
-    const accessCodeElement = document.getElementById('rifaAccessCode');
-    
-    if (!titleElement || !descriptionElement || !accessCodeElement) {
-        showNotification('Error: No se encontraron los campos del formulario', 'error');
-        return;
-    }
-    
-    // Obtener valores
-    const title = titleElement.value.trim();
-    const description = descriptionElement.value.trim();
-    const accessCode = accessCodeElement.value.trim();
-    
-    // Validar campos
-    if (!title || !description || !accessCode) {
-        showNotification('Por favor completa todos los campos', 'error');
-        return;
-    }
-    
-    // Verificar que el código de acceso no esté ya en uso
-    if (userRifas.some(rifa => rifa.accessCode === accessCode)) {
-        showNotification('Este código de acceso ya está en uso', 'error');
-        return;
-    }
-    
-    // Crear nueva simulación
-    const newRifa = {
-        id: Date.now(), // ID único basado en timestamp
-        title: title,
-        description: description,
-        accessCode: accessCode,
-        sold: [], // Array de números vendidos (vacío inicialmente)
-        created: new Date().toLocaleDateString('es-ES')
-    };
-    
-    // Agregar a array global
-    userRifas.push(newRifa);
-    
-    // Limpiar formulario
-    titleElement.value = '';
-    descriptionElement.value = '';
-    accessCodeElement.value = '';
-    
-    // Actualizar interfaz
-    updateUserRifasList();
-    
-    // Actualizar estadísticas si estamos en la página correcta
-    const statNumber = document.querySelector('.stat-card:nth-child(2) .stat-number');
-    if (statNumber) {
-        statNumber.textContent = userRifas.length;
-    }
-    
-    showNotification(`¡Simulación "${title}" creada exitosamente! Código: ${accessCode}`);
-}
-
-/**
- * Actualizar lista de rifas del usuario en la interfaz
- */
-function updateUserRifasList() {
-    const userRifasList = document.getElementById('userRifasList');
-    
-    if (!userRifasList) {
-        return; // No estamos en la página de perfil
-    }
-    
-    if (userRifas.length === 0) {
-        userRifasList.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No has creado ninguna simulación aún</p>';
-        return;
-    }
-    
-    // Generar HTML para cada rifa
-    userRifasList.innerHTML = userRifas.map(rifa => `
-        <div class="user-rifa-card">
-            <div class="user-rifa-header">
-                <h4>${rifa.title}</h4>
-                <span class="rifa-date">Creada: ${rifa.created}</span>
-            </div>
-            <p class="user-rifa-description">${rifa.description}</p>
-            <div class="user-rifa-stats">
-                <span class="stat-item">🔑 Código: ${rifa.accessCode}</span>
-                <span class="stat-item">📊 ${rifa.sold.length}/100 números</span>
-            </div>
-            <div class="user-rifa-actions">
-                <button class="btn btn-secondary btn-small" onclick="editRifa(${rifa.id})">✏️ Editar</button>
-                <button class="btn btn-primary btn-small" onclick="deleteRifa(${rifa.id})">🗑️ Eliminar</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-/**
- * Editar una rifa existente
- * @param {number} rifaId - ID de la rifa a editar
- */
-function editRifa(rifaId) {
-    const rifa = userRifas.find(r => r.id === rifaId);
-    if (!rifa) return;
-    
-    // Mostrar prompts para editar
-    const newTitle = prompt('Nuevo título:', rifa.title);
-    if (newTitle === null) return; // Usuario canceló
-    
-    const newDescription = prompt('Nueva descripción:', rifa.description);
-    if (newDescription === null) return;
-    
-    const newAccessCode = prompt('Nuevo código de acceso:', rifa.accessCode);
-    if (newAccessCode === null) return;
-    
-    // Actualizar si se proporcionaron todos los valores
-    if (newTitle && newDescription && newAccessCode) {
-        // Verificar que el nuevo código no esté en uso por otra rifa
-        if (newAccessCode !== rifa.accessCode && userRifas.some(r => r.accessCode === newAccessCode)) {
-            showNotification('Este código de acceso ya está en uso', 'error');
-            return;
-        }
-        
-        rifa.title = newTitle;
-        rifa.description = newDescription;
-        rifa.accessCode = newAccessCode;
-        updateUserRifasList();
-        showNotification('Simulación actualizada exitosamente!');
-    }
-}
-
-/**
- * Eliminar una rifa
- * @param {number} rifaId - ID de la rifa a eliminar
- */
-function deleteRifa(rifaId) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta simulación?')) {
-        userRifas = userRifas.filter(r => r.id !== rifaId);
-        updateUserRifasList();
-        
-        // Actualizar estadísticas
-        const statNumber = document.querySelector('.stat-card:nth-child(2) .stat-number');
-        if (statNumber) {
-            statNumber.textContent = userRifas.length;
-        }
-        
-        showNotification('Simulación eliminada exitosamente!');
-    }
-}
-
 // ===== INICIALIZACIÓN =====
 
-/**
- * Inicializar datos de ejemplo (solo para desarrollo)
- */
-function initializeExampleData() {
-    // Solo agregar datos de ejemplo si no existen usuarios
-    const existingUsers = localStorage.getItem('registeredUsers');
-    if (!existingUsers) {
-        const exampleUsers = [
-            {
-                username: 'admin',
-                email: 'admin@talento.tech',
-                password: '1234'
-            },
-            {
-                username: 'estudiante1',
-                email: 'estudiante1@talento.tech',
-                password: '1234'
-            },
-            {
-                username: 'demo',
-                email: 'demo@talento.tech',
-                password: 'demo'
-            }
-        ];
-        localStorage.setItem('registeredUsers', JSON.stringify(exampleUsers));
-        console.log('Usuarios de ejemplo creados: admin/1234, estudiante1/1234, demo/demo');
-    }
-}
+document.addEventListener('DOMContentLoaded', async function() {
+    // Generar grilla inicial
+    generateNumbersGrid();
+    updateCart();
+    
+    // Verificar estado de sesión con el backend
+    await checkSessionStatus();
+    
+    console.log('Simulador de Rifas inicializado - Conectado al backend');
+    console.log('Backend URL:', API_BASE_URL);
+    
+    // Configurar event listeners para modales
+    setupModalEventListeners();
+});
 
-/**
- * Limpiar todos los datos de la aplicación (solo para desarrollo)
- */
-function clearAllData() {
-    if (confirm('Esta acción eliminará TODOS los datos (usuarios, rifas, etc.). ¿Estás seguro?')) {
-        localStorage.clear();
-        sessionStorage.clear();
-        currentUser = null;
-        userRifas = [];
-        selectedNumbers = [];
-        winnerNumber = null;
-        updateAuthUI(false);
-        navigateTo('demo');
-        showNotification('Todos los datos han sido eliminados');
-        console.log('Todos los datos eliminados');
-    }
-}
-
-/**
- * Configurar event listeners para modales
- */
 function setupModalEventListeners() {
-    // Cerrar modales con click fuera del contenido
     document.addEventListener('click', function(event) {
         if (event.target.classList.contains('auth-modal')) {
             closeAuthModal();
@@ -1035,7 +933,6 @@ function setupModalEventListeners() {
         }
     });
     
-    // Cerrar modales con tecla Escape
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeAuthModal();
@@ -1043,7 +940,6 @@ function setupModalEventListeners() {
         }
     });
     
-    // Enviar formularios con Enter
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             if (document.getElementById('loginModal').style.display === 'flex') {
@@ -1057,37 +953,7 @@ function setupModalEventListeners() {
     });
 }
 
-/**
- * Inicializar la aplicación cuando el DOM esté listo
- */
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar datos de ejemplo
-    initializeExampleData();
-    
-    // Configurar event listeners para modales
-    setupModalEventListeners();
-    
-    // Generar grilla inicial y actualizar interfaz
-    generateNumbersGrid();
-    updateCart();
-    
-    // Verificar estado de sesión
-    checkSessionStatus();
-    
-    console.log('Simulador de Rifas inicializado - Talento Tech curso NODE.JS');
-    console.log('Usuarios disponibles: admin/1234, estudiante1/1234, demo/demo');
-    console.log('Para limpiar todos los datos, ejecuta: clearAllData()');
-});
-
-/**
- * Verificar y aplicar el estado de sesión guardado
- */
-function checkSessionStatus() {
-    // Verificar si hay un usuario logueado
-    const isLoggedIn = isUserLoggedIn();
-    
-    // Actualizar la interfaz según el estado
-    updateAuthUI(isLoggedIn);
-    
-    console.log('Estado de autenticación verificado:', isLoggedIn ? `Usuario: ${currentUser.username}` : 'No logueado');
+// Función para mostrar login desde la navegación
+function login() {
+    showLoginModal();
 }
