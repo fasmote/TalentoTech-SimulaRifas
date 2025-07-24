@@ -17,8 +17,22 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="#" class="active" onclick="navigateTo('demo')">Inicio</a></li>
                 <li><a href="#" onclick="navigateTo('rifas')">Simulaciones Públicas</a></li>
-                <li><a href="#" onclick="navigateTo('perfil')">Mi Perfil</a></li>
+                <li id="perfilNavItem" style="display: none;"><a href="#" onclick="navigateTo('perfil')">Mi Perfil</a></li>
             </ul>
+            
+            <!-- Sección de autenticación -->
+            <div class="auth-section">
+                <!-- Sección para usuario no logueado -->
+                <div id="loginSection" class="login-section">
+                    <button class="btn btn-primary" onclick="login()">👤 Iniciar Sesión</button>
+                </div>
+                
+                <!-- Sección para usuario logueado -->
+                <div id="userSection" class="user-section" style="display: none;">
+                    <span class="welcome-text">¡Hola! 👋</span>
+                    <button class="btn btn-secondary" onclick="logout()">🚪 Cerrar Sesión</button>
+                </div>
+            </div>
             
             <!-- Botón para menú móvil -->
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>

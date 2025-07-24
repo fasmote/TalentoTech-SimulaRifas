@@ -6,6 +6,84 @@ let selectedNumbers = [];
 // Variable para almacenar el número ganador
 let winnerNumber = null;
 
+// ===== FUNCIONES DE AUTENTICACIÓN =====
+
+/**
+ * Verificar si el usuario está logueado
+ * @returns {boolean} true si está logueado, false si no
+ */
+function isUserLoggedIn() {
+    const isLoggedOut = sessionStorage.getItem('isLoggedOut');
+    return isLoggedOut !== 'true';
+}
+
+/**
+ * Iniciar sesión del usuario
+ */
+function login() {
+    // Limpiar estado de sesión cerrada
+    sessionStorage.removeItem('isLoggedOut');
+    
+    // Mostrar sección de usuario y ocultar login
+    const userSection = document.getElementById('userSection');
+    const loginSection = document.getElementById('loginSection');
+    const perfilNavItem = document.getElementById('perfilNavItem');
+    
+    if (userSection) {
+        userSection.style.display = 'flex';
+    }
+    if (loginSection) {
+        loginSection.style.display = 'none';
+    }
+    if (perfilNavItem) {
+        perfilNavItem.style.display = 'block';
+    }
+    
+    // Mostrar notificación
+    showNotification('Bienvenido de nuevo!');
+    
+    console.log('Login completado - estado actualizado en sessionStorage');
+}
+
+/**
+ * Cerrar sesión del usuario
+ */
+function logout() {
+    // Mostrar confirmación
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+        // Limpiar datos del usuario
+        userRifas = [];
+        selectedNumbers = [];
+        winnerNumber = null;
+        
+        // Guardar estado de sesión cerrada ANTES de manipular la UI
+        sessionStorage.setItem('isLoggedOut', 'true');
+        
+        // Ocultar sección de usuario y mostrar login
+        const userSection = document.getElementById('userSection');
+        const loginSection = document.getElementById('loginSection');
+        const perfilNavItem = document.getElementById('perfilNavItem');
+        
+        if (userSection) {
+            userSection.style.display = 'none';
+        }
+        if (loginSection) {
+            loginSection.style.display = 'flex';
+        }
+        if (perfilNavItem) {
+            perfilNavItem.style.display = 'none';
+        }
+        
+        // Volver a la página de inicio
+        navigateTo('demo');
+        
+        // Mostrar notificación
+        showNotification('Sesión cerrada exitosamente');
+        
+        console.log('Logout completado - estado guardado en sessionStorage');
+    }
+}
+
 // ===== FUNCIONES DE NAVEGACIÓN =====
 
 /**
@@ -21,6 +99,12 @@ function toggleMobileMenu() {
  * @param {string} page - Nombre de la página a mostrar
  */
 function navigateTo(page) {
+    // Verificar si el usuario intenta acceder al perfil sin estar logueado
+    if (page === 'perfil' && !isUserLoggedIn()) {
+        showNotification('Debes iniciar sesión para acceder a tu perfil', 'error');
+        return;
+    }
+    
     // Simular navegación SPA (Single Page Application)
     switch(page) {
         case 'rifas':
@@ -52,8 +136,25 @@ function updateActiveNav(activePage) {
     });
     
     // Activar el enlace correspondiente
-    const pageIndex = activePage === 'demo' ? 0 : activePage === 'rifas' ? 1 : 2;
-    document.querySelectorAll('.nav-links a')[pageIndex].classList.add('active');
+    let pageIndex;
+    switch(activePage) {
+        case 'demo':
+            pageIndex = 0;
+            break;
+        case 'rifas':
+            pageIndex = 1;
+            break;
+        case 'perfil':
+            pageIndex = 2;
+            break;
+        default:
+            pageIndex = 0;
+    }
+    
+    const navLinks = document.querySelectorAll('.nav-links a');
+    if (navLinks[pageIndex]) {
+        navLinks[pageIndex].classList.add('active');
+    }
 }
 
 // ===== FUNCIONES DE PÁGINAS =====
@@ -755,5 +856,48 @@ document.addEventListener('DOMContentLoaded', function() {
     generateNumbersGrid();
     updateCart();
     
+    // Verificar estado de sesión
+    checkSessionStatus();
+    
     console.log('Simulador de Rifas inicializado - Talento Tech curso NODE.JS');
 });
+
+/**
+ * Verificar y aplicar el estado de sesión guardado
+ */
+function checkSessionStatus() {
+    const userSection = document.getElementById('userSection');
+    const loginSection = document.getElementById('loginSection');
+    const perfilNavItem = document.getElementById('perfilNavItem');
+    
+    // Solo aplicar lógica de sesión si existen elementos de autenticación en la página
+    if (!userSection && !loginSection) {
+        console.log('No hay elementos de autenticación en esta página');
+        return;
+    }
+    
+    const isLoggedOut = sessionStorage.getItem('isLoggedOut');
+    
+    if (isLoggedOut === 'true') {
+        // Usuario deslogueado: ocultar sección de usuario y mostrar login
+        if (userSection) {
+            userSection.style.display = 'none';
+        }
+        if (loginSection) {
+            loginSection.style.display = 'flex';
+        }
+        if (perfilNavItem) {
+            perfilNavItem.style.display = 'none';
+        }
+    } else {
+        // Solo mostrar como logueado si hay elementos de usuario presentes
+        // Y no forzar login automático en páginas que no lo requieren
+        if (userSection && loginSection) {
+            userSection.style.display = 'flex';
+            loginSection.style.display = 'none';
+            if (perfilNavItem) {
+                perfilNavItem.style.display = 'block';
+            }
+        }
+    }
+}

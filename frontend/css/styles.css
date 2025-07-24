@@ -32,10 +32,10 @@ body {
     margin: 0 auto;
     padding: 0 20px;
     display: flex;
-    justify-content: center; /* Centra los elementos */
+    justify-content: space-between; /* Distribuir espacio para logo, nav y autenticación */
     align-items: center;
     height: 70px;
-    gap: 50px; /* Espacio entre logo y navegación */
+    gap: 20px; /* Espacio entre elementos */
 }
 
 /* ===== LOGO DE LA APLICACIÓN ===== */
@@ -53,6 +53,20 @@ body {
     gap: 30px; /* Espacio entre elementos */
     margin: 0;
     padding: 0;
+    align-items: center;
+}
+
+/* ===== SECCIÓN DE USUARIO ===== */
+.user-section, .login-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-section #userName {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.95rem;
 }
 
 .nav-links a {
@@ -689,7 +703,21 @@ h1 {
 @media (max-width: 768px) {
     /* Navegación responsive para móvil */
     .nav-container {
-        justify-content: space-between; /* En móvil vuelve al layout original */
+        justify-content: space-between; /* Mantener la distribución en móvil */
+    }
+    
+    /* Sección de usuario en móvil */
+    .user-section {
+        gap: 10px;
+    }
+    
+    .user-section #userName {
+        display: none; /* Ocultar nombre en móvil para ahorrar espacio */
+    }
+    
+    .user-section .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
     
     /* Navegación móvil */
@@ -784,5 +812,66 @@ h1 {
 
     .number-cell {
         font-size: 0.9rem;
+    }
+}
+
+/* ===== ESTILOS DE AUTENTICACIÓN ===== */
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.login-section, .user-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.welcome-text {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+/* Botones de autenticación más pequeños */
+.auth-section .btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    min-width: auto;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #333;
+    padding: 5px;
+}
+
+/* Responsive para autenticación */
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .auth-section {
+        gap: 5px; /* Menos espacio en móvil */
+    }
+    
+    .auth-section .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .welcome-text {
+        display: none; /* Ocultar texto de bienvenida en móvil para ahorrar espacio */
+    }
+    
+    .nav-container {
+        gap: 10px;
     }
 }
