@@ -1,0 +1,29 @@
+{
+  "name": "simulador-rifas-backend",
+  "version": "1.0.0",
+  "description": "Backend para el simulador de rifas - TalentoTech",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "init-db": "node database/init.js",
+    "sample-data": "node database/sample-data.js",
+    "reset-db": "npm run init-db && npm run sample-data",
+    "verify": "node verificar.js",
+    "test": "npm run verify"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["rifas", "simulador", "talentotech"],
+  "author": "TalentoTech Student",
+  "license": "MIT"
+}
