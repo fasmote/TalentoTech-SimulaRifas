@@ -114,6 +114,18 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
         .subtitle {
             color: rgba(255,255,255,0.8);
             font-size: 1.1rem;
@@ -690,6 +702,21 @@
                 <div class="modal-buttons">
                     <button type="button" class="btn btn-secondary" onclick="closeAccessCodeModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Acceder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NUEVO: Modal de Editar Simulación -->
+    <div class="modal" id="editRifaModal" style="display: none;">
+        <div class="modal-content">
+            <h2>✏️ Editar Simulación</h2>
+            <form id="editRifaForm">
+                <input type="text" id="editRifaTitle" placeholder="Título de la simulación" class="form-input" required>
+                <textarea id="editRifaDescription" placeholder="Descripción del premio o evento" class="form-textarea" required></textarea>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditRifaModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Actualizar</button>
                 </div>
             </form>
         </div>
@@ -1774,6 +1801,287 @@
             closeWinnerModal();
         }
 
+        // ========== FUNCIONES REPARADAS PARA BOTONES EDITAR Y VER ==========
+
+        // FUNCIÓN VER RIFA - Corregida y funcional
+        async function viewRifa(rifaId) {
+            try {
+                console.log('Cargando detalles de la rifa:', rifaId);
+                
+                // Cargar detalles de los números de la rifa
+                const numbersResponse = await fetch(`${API_BASE}/rifas/${rifaId}/numbers`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+                
+                if (!numbersResponse.ok) {
+                    throw new Error('Error cargando números de la rifa');
+                }
+                
+                const numbersData = await numbersResponse.json();
+                
+                // Obtener información básica de la rifa
+                const rifaResponse = await fetch(`${API_BASE}/rifas/my`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+                
+                if (!rifaResponse.ok) {
+                    throw new Error('Error cargando información de la rifa');
+                }
+                
+                const rifaData = await rifaResponse.json();
+                const rifa = rifaData.rifas.find(r => r.id == rifaId);
+                
+                if (!rifa) {
+                    showNotification('Simulación no encontrada', 'error');
+                    return;
+                }
+                
+                showRifaDetails(rifa, numbersData.numbers);
+                
+            } catch (error) {
+                console.error('Error visualizando rifa:', error);
+                showNotification('Error cargando detalles de la simulación', 'error');
+            }
+        }
+
+        // FUNCIÓN EDITAR RIFA - Corregida y funcional
+        async function editRifa(rifaId) {
+            try {
+                console.log('Editando rifa:', rifaId);
+                
+                // Obtener información de la rifa
+                const response = await fetch(`${API_BASE}/rifas/my`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error cargando información de la rifa');
+                }
+                
+                const data = await response.json();
+                const rifa = data.rifas.find(r => r.id == rifaId);
+                
+                if (!rifa) {
+                    showNotification('Simulación no encontrada', 'error');
+                    return;
+                }
+                
+                // Llenar el formulario con los datos actuales
+                document.getElementById('editRifaTitle').value = rifa.title;
+                document.getElementById('editRifaDescription').value = rifa.description || '';
+                
+                // Guardar el ID de la rifa que se está editando globalmente
+                window.currentEditingRifaId = rifaId;
+                
+                // Mostrar el modal
+                document.getElementById('editRifaModal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error editando rifa:', error);
+                showNotification('Error cargando información para editar', 'error');
+            }
+        }
+
+        // FUNCIÓN CERRAR MODAL DE EDICIÓN
+        function closeEditRifaModal() {
+            document.getElementById('editRifaModal').style.display = 'none';
+            document.getElementById('editRifaForm').reset();
+            window.currentEditingRifaId = null;
+        }
+
+        // EVENT LISTENER PARA EL FORMULARIO DE EDICIÓN
+        document.getElementById('editRifaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!window.currentEditingRifaId) {
+                showNotification('Error: No se ha seleccionado ninguna simulación para editar', 'error');
+                return;
+            }
+            
+            const title = document.getElementById('editRifaTitle').value;
+            const description = document.getElementById('editRifaDescription').value;
+            
+            try {
+                const updateResponse = await fetch(`${API_BASE}/rifas/${window.currentEditingRifaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    },
+                    body: JSON.stringify({ title, description })
+                });
+                
+                const updateData = await updateResponse.json();
+                
+                if (updateResponse.ok) {
+                    closeEditRifaModal();
+                    showNotification('Simulación actualizada exitosamente');
+                    showPerfilPage(); // Recargar perfil
+                } else {
+                    showNotification(updateData.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error actualizando rifa:', error);
+                showNotification('Error de conexión', 'error');
+            }
+        });
+
+        // FUNCIÓN MOSTRAR DETALLES DE LA RIFA
+        function showRifaDetails(rifa, numbers) {
+            const numbersGrid = Array.from({length: 100}, (_, i) => i);
+            const soldNumbers = numbers.map(n => n.number);
+            
+            // Agrupar números por participante
+            const participantGroups = {};
+            numbers.forEach(num => {
+                const name = num.participant_name || 'Sin nombre';
+                if (!participantGroups[name]) {
+                    participantGroups[name] = [];
+                }
+                participantGroups[name].push(num.number);
+            });
+            
+            const participantsList = Object.entries(participantGroups).map(([name, nums]) => {
+                const sortedNums = nums.sort((a, b) => a - b);
+                return `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #4caf50;">
+                        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">👤 ${name}</div>
+                        <div style="color: #666; font-size: 0.9rem;">
+                            Números: ${sortedNums.map(n => n.toString().padStart(2, '0')).join(', ')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            const statusBadge = rifa.status === 'active' ? 
+                '<span style="background: #4caf50; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">✅ Activa</span>' :
+                '<span style="background: #ff9800; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">🏆 Completada</span>';
+            
+            const winnerSection = rifa.winner_number ? 
+                `<div style="background: linear-gradient(45deg, #ffd700, #ffb347); color: #333; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 10px 0;">🏆 ¡Ganador Sorteado!</h3>
+                    <div style="font-size: 2.5rem; font-weight: bold; margin: 10px 0;">Número ${rifa.winner_number.toString().padStart(2, '0')}</div>
+                </div>` : '';
+            
+            document.getElementById('mainContainer').innerHTML = `
+                <div class="page-header">
+                    <h1>👁️ ${rifa.title}</h1>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+                        ${statusBadge}
+                        <span style="color: rgba(255,255,255,0.8);">Código: <strong>${rifa.access_code}</strong></span>
+                    </div>
+                </div>
+                
+                <div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                    <strong>📊 Vista de Monitoreo:</strong> Esta es la vista del propietario para monitorear la simulación. 
+                    Los participantes usan el código <strong>${rifa.access_code}</strong> para acceder y seleccionar números.
+                </div>
+                
+                ${winnerSection}
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 20px;">🎯 Tablero de Números</h3>
+                        
+                        <div style="display: flex; gap: 20px; margin-bottom: 15px; font-size: 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <div style="width: 20px; height: 20px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 4px;"></div>
+                                <span>Disponible</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <div style="width: 20px; height: 20px; background: #ff6b6b; border-radius: 4px;"></div>
+                                <span>Ocupado</span>
+                            </div>
+                            ${rifa.winner_number ? `
+                                <div style="display: flex; align-items: center; gap: 5px;">
+                                    <div style="width: 20px; height: 20px; background: linear-gradient(45deg, #ffd700, #ffb347); border-radius: 4px;"></div>
+                                    <span>Ganador</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="numbers-grid" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; margin-bottom: 20px;">
+                            ${numbersGrid.map(i => {
+                                const isSelected = soldNumbers.includes(i);
+                                const participant = numbers.find(n => n.number === i);
+                                const participantName = participant ? participant.participant_name || 'Sin nombre' : '';
+                                
+                                return `
+                                    <div class="number-cell ${isSelected ? 'sold' : ''} ${rifa.winner_number === i ? 'winner' : ''}" 
+                                         style="aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
+                                                border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: default;
+                                                ${isSelected ? 'background: #ff6b6b; color: white; border: 2px solid #ff6b6b;' : 'background: #f8f9fa; border: 2px solid #e9ecef;'}
+                                                ${rifa.winner_number === i ? 'background: linear-gradient(45deg, #ffd700, #ffb347) !important; color: #333 !important; animation: pulse 1s infinite;' : ''}"
+                                         title="${isSelected ? `Ocupado por: ${participantName}` : 'Disponible'}">
+                                        ${i.toString().padStart(2, '0')}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center; font-size: 0.9rem;">
+                            <div style="padding: 10px; background: #e8f5e8; border-radius: 8px;">
+                                <div style="font-weight: bold; color: #2e7d32;">Disponibles</div>
+                                <div style="font-size: 1.2rem; color: #4caf50;">${100 - soldNumbers.length}</div>
+                            </div>
+                            <div style="padding: 10px; background: #ffebee; border-radius: 8px;">
+                                <div style="font-weight: bold; color: #c62828;">Ocupados</div>
+                                <div style="font-size: 1.2rem; color: #f44336;">${soldNumbers.length}</div>
+                            </div>
+                            <div style="padding: 10px; background: #fff3e0; border-radius: 8px;">
+                                <div style="font-weight: bold; color: #ef6c00;">Participantes</div>
+                                <div style="font-size: 1.2rem; color: #ff9800;">${Object.keys(participantGroups).length}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <h3 style="margin-bottom: 20px;">📋 Información de la Simulación</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <p><strong>Descripción:</strong></p>
+                            <p style="color: #666; font-style: italic; margin-bottom: 15px;">${rifa.description || 'Sin descripción'}</p>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0;">🔑 Código de Acceso</h4>
+                            <div style="font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; 
+                                        background: linear-gradient(45deg, #667eea, #764ba2); color: white; 
+                                        padding: 10px; border-radius: 8px; text-align: center;">
+                                ${rifa.access_code}
+                            </div>
+                            <button class="btn btn-secondary" style="width: 100%; margin-top: 10px; padding: 8px;" 
+                                    onclick="copyToClipboard('${rifa.access_code}')">
+                                📋 Copiar Código
+                            </button>
+                            <p style="font-size: 0.9rem; color: #666; margin-top: 10px; text-align: center;">
+                                Los participantes usan este código para acceder
+                            </p>
+                        </div>
+                        
+                        <h4 style="margin-bottom: 15px;">👥 Participantes (${Object.keys(participantGroups).length})</h4>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            ${participantsList || '<p style="color: #666; text-align: center; padding: 20px;">No hay participantes aún</p>'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="showPerfilPage()">← Volver al Perfil</button>
+                    <button class="btn btn-primary" onclick="editRifa(${rifa.id})" style="margin-left: 10px;">✏️ Editar</button>
+                    ${rifa.status === 'active' && soldNumbers.length > 0 ? 
+                        `<button class="btn btn-success" onclick="drawRifaWinner(${rifa.id})" style="margin-left: 10px;">🎲 Realizar Sorteo</button>` : ''
+                    }
+                </div>
+            `;
+        }
+
         // ========== UTILIDADES ==========
 
         function showNotification(message, type = 'success') {
@@ -1786,15 +2094,6 @@
             setTimeout(() => {
                 notification.remove();
             }, 3000);
-        }
-
-        // Funciones placeholder para compatibilidad
-        function editRifa(rifaId) {
-            showNotification('Función de edición en desarrollo');
-        }
-
-        function viewRifa(rifaId) {
-            participateInRifa(rifaId);
         }
     </script>
 </body>
