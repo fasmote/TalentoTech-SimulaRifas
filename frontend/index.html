@@ -577,6 +577,12 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
+            
+            /* NUEVO: Grid de detalles de rifa responsive */
+            .rifa-details-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
 
             h1 {
                 font-size: 2rem;
@@ -625,7 +631,7 @@
                 <li><a href="#" class="active" onclick="navigateTo('demo')">Inicio</a></li>
                 <li><a href="#" onclick="navigateTo('rifas')">Simulaciones Públicas</a></li>
                 <li><a href="#" onclick="navigateTo('codigo')">Acceder por Código</a></li>
-                <li><a href="#" onclick="navigateTo('perfil')" id="perfilLink">Mi Perfil</a></li>
+                <li><a href="#" onclick="navigateTo('perfil')" id="perfilLink" style="display: none;">Mis Simulaciones</a></li>
             </ul>
             <div class="nav-user" id="navUser">
                 <span class="user-info" id="userInfo" style="display: none;"></span>
@@ -769,16 +775,27 @@
         function updateNavForLoggedUser() {
             const userInfo = document.getElementById('userInfo');
             const authBtn = document.getElementById('authBtn');
+            const perfilLink = document.getElementById('perfilLink');
             
             if (currentUser) {
                 userInfo.textContent = `Hola, ${currentUser.username}`;
                 userInfo.style.display = 'block';
                 authBtn.textContent = 'Cerrar Sesión';
                 authBtn.onclick = logout;
+                
+                // Mostrar opción "Mis Simulaciones" cuando está logueado
+                if (perfilLink) {
+                    perfilLink.style.display = 'block';
+                }
             } else {
                 userInfo.style.display = 'none';
                 authBtn.textContent = 'Iniciar Sesión';
                 authBtn.onclick = showAuthModal;
+                
+                // Ocultar opción "Mis Simulaciones" cuando NO está logueado
+                if (perfilLink) {
+                    perfilLink.style.display = 'none';
+                }
             }
         }
 
@@ -848,6 +865,9 @@
                     updateNavForLoggedUser();
                     closeAuthModal();
                     showNotification(data.message);
+                    
+                    // NUEVO: Ir directo a "Mis Simulaciones" después del login
+                    navigateTo('perfil');
                 } else {
                     showNotification(data.error, 'error');
                 }
@@ -873,6 +893,8 @@
             currentUser = null;
             updateNavForLoggedUser();
             showNotification('Sesión cerrada');
+            
+            // NUEVO: Ir al inicio al cerrar sesión
             navigateTo('demo');
         }
 
@@ -1231,7 +1253,7 @@
 
             document.getElementById('mainContainer').innerHTML = `
                 <div class="page-header">
-                    <h1>👤 Mi Perfil</h1>
+                    <h1>👥 Mis Simulaciones</h1>
                     <p class="subtitle">Gestiona tu cuenta y tus simulaciones privadas</p>
                 </div>
                 
@@ -1263,7 +1285,7 @@
         function displayUserProfile(userRifas) {
             const content = `
                 <div class="page-header">
-                    <h1>👤 Mi Perfil</h1>
+                    <h1>👥 Mis Simulaciones</h1>
                     <p class="subtitle">Gestiona tu cuenta y tus simulaciones privadas</p>
                 </div>
                 
@@ -2066,7 +2088,16 @@
                 
                 try {
                     // Si es una fecha SQLite (formato: 2024-07-28 15:30:45)
-                    const date = new Date(dateTimeString.replace(' ', 'T'));
+                    // SQLite almacena en UTC, necesitamos convertir a hora local
+                    let date;
+                    
+                    if (dateTimeString.includes('T')) {
+                        // Ya tiene formato ISO
+                        date = new Date(dateTimeString);
+                    } else {
+                        // Formato SQLite: necesitamos agregar 'T' y asumir que es UTC
+                        date = new Date(dateTimeString.replace(' ', 'T') + 'Z');
+                    }
                     
                     if (isNaN(date.getTime())) {
                         return 'Fecha inválida';
@@ -2078,29 +2109,40 @@
                     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
                     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
                     
-                    // Formato de fecha legible
-                    const timeStr = date.toLocaleTimeString('es-AR', { 
+                    // NUEVO: Detectar zona horaria del usuario automáticamente
+                    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    
+                    // Formato de fecha legible en la zona horaria LOCAL del usuario
+                    const timeStr = date.toLocaleTimeString(navigator.language || 'es-AR', { 
                         hour: '2-digit', 
                         minute: '2-digit',
-                        hour12: false
+                        hour12: false,
+                        timeZone: userTimeZone
                     });
-                    const dateStr = date.toLocaleDateString('es-AR', {
+                    const dateStr = date.toLocaleDateString(navigator.language || 'es-AR', {
                         day: '2-digit',
                         month: '2-digit',
-                        year: '2-digit'
+                        year: '2-digit',
+                        timeZone: userTimeZone
                     });
+                    
+                    // Obtener nombre de la zona horaria para mostrar
+                    const timeZoneName = new Intl.DateTimeFormat(navigator.language || 'es-AR', {
+                        timeZoneName: 'short',
+                        timeZone: userTimeZone
+                    }).formatToParts(date).find(part => part.type === 'timeZoneName')?.value || '';
                     
                     // Mostrar tiempo relativo si es reciente
                     if (diffMins < 1) {
-                        return `🕐 Hace un momento (${timeStr})`;
+                        return `🕐 Hace un momento (${timeStr} ${timeZoneName})`;
                     } else if (diffMins < 60) {
-                        return `🕐 Hace ${diffMins}min (${timeStr})`;
+                        return `🕐 Hace ${diffMins}min (${timeStr} ${timeZoneName})`;
                     } else if (diffHours < 24) {
-                        return `🕐 Hace ${diffHours}h (${timeStr})`;
+                        return `🕐 Hace ${diffHours}h (${timeStr} ${timeZoneName})`;
                     } else if (diffDays < 7) {
-                        return `📅 Hace ${diffDays}d (${dateStr} ${timeStr})`;
+                        return `📅 Hace ${diffDays}d (${dateStr} ${timeStr} ${timeZoneName})`;
                     } else {
-                        return `📅 ${dateStr} ${timeStr}`;
+                        return `📅 ${dateStr} ${timeStr} ${timeZoneName}`;
                     }
                 } catch (error) {
                     console.error('Error formateando fecha:', error);
@@ -2199,7 +2241,7 @@
                 
                 ${winnerSection}
                 
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;" class="rifa-details-grid">
                     <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
                         <h3 style="margin-bottom: 20px;">🎯 Tablero de Números</h3>
                         
@@ -2281,6 +2323,13 @@
                         </div>
                         
                         <h4 style="margin-bottom: 15px;">👥 Participantes (${Object.keys(participantGroups).length})</h4>
+                        
+                        ${participantsList ? `
+                            <div style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 6px; padding: 8px; margin-bottom: 15px; font-size: 0.8rem; text-align: center;">
+                                🌍 Las fechas se muestran en tu zona horaria: <strong>${Intl.DateTimeFormat().resolvedOptions().timeZone}</strong>
+                            </div>
+                        ` : ''}
+                        
                         <div style="max-height: 300px; overflow-y: auto;">
                             ${participantsList || '<p style="color: #666; text-align: center; padding: 20px;">No hay participantes aún</p>'}
                         </div>
@@ -2288,7 +2337,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn btn-secondary" onclick="showPerfilPage()">← Volver al Perfil</button>
+                    <button class="btn btn-secondary" onclick="showPerfilPage()">← Volver a Mis Simulaciones</button>
                     <button class="btn btn-primary" onclick="editRifa(${rifa.id})" style="margin-left: 10px;">✏️ Editar</button>
                     ${rifa.status === 'active' && soldNumbers.length > 0 ? 
                         `<button class="btn btn-success" onclick="drawRifaWinner(${rifa.id})" style="margin-left: 10px;">🎲 Realizar Sorteo</button>` : ''
