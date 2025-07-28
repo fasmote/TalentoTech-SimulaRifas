@@ -99,26 +99,37 @@ const initDatabase = async () => {
             return result;
         };
 
-        // Rifas públicas de ejemplo (simuladas) para usuarios no logueados
+        // FASE 15: Crear contenido demo avanzado
+        console.log('🎊 FASE 15: Integrando contenido de demostración...');
         try {
-            await runQuery(`
-                INSERT OR IGNORE INTO rifas (user_id, title, description, is_public, status) 
-                VALUES (NULL, 'PlayStation 5', 'Simulación de ejemplo para evento gaming', TRUE, 'active')
-            `);
-            
-            await runQuery(`
-                INSERT OR IGNORE INTO rifas (user_id, title, description, is_public, status) 
-                VALUES (NULL, 'iPhone 15 Pro', 'Simulación de ejemplo para evento corporativo', TRUE, 'active')
-            `);
-
-            await runQuery(`
-                INSERT OR IGNORE INTO rifas (user_id, title, description, is_public, status) 
-                VALUES (NULL, 'Pack de Productos', 'Simulación de ejemplo para evento familiar', TRUE, 'active')
-            `);
-            
-            console.log('🎮 Rifas públicas de ejemplo creadas (simuladas)');
+            const createDemoContent = require('./demo-content');
+            await createDemoContent();
+            console.log('✅ Contenido demo FASE 15 integrado exitosamente');
         } catch (err) {
-            console.log('🎮 Error creando rifas de ejemplo:', err.message);
+            console.log('⚠️ Error creando contenido demo avanzado:', err.message);
+            console.log('📋 Creando rifas básicas como respaldo...');
+            
+            // Rifas públicas básicas como respaldo
+            try {
+                await runQuery(`
+                    INSERT OR IGNORE INTO rifas (user_id, title, description, is_public, status) 
+                    VALUES (NULL, 'iPhone 15 Pro', 'Simulación de ejemplo para evento corporativo. Esta es una simulación educativa sin valor monetario.', TRUE, 'active')
+                `);
+                
+                await runQuery(`
+                    INSERT OR IGNORE INTO rifas (user_id, title, description, is_public, status) 
+                    VALUES (NULL, 'Cartera Premium', 'Simulación de ejemplo para evento de moda. Esta es una simulación educativa sin valor monetario.', TRUE, 'active')
+                `);
+
+                await runQuery(`
+                    INSERT OR IGNORE INTO rifas (user_id, title, description, is_public, status) 
+                    VALUES (NULL, 'Viaje Europa', 'Simulación de ejemplo para evento turístico. Esta es una simulación educativa sin valor monetario.', TRUE, 'active')
+                `);
+                
+                console.log('🎮 Rifas públicas básicas creadas como respaldo');
+            } catch (backupErr) {
+                console.log('❌ Error creando rifas de respaldo:', backupErr.message);
+            }
         }
 
         // Actualizar rifas existentes para que tengan códigos de acceso si no son públicas
@@ -139,13 +150,21 @@ const initDatabase = async () => {
             console.log('🔑 Error generando códigos:', err.message);
         }
 
-        console.log('🎉 Fase 12 - Base de datos actualizada correctamente!');
+        console.log('🎉 FASE 15 - Base de datos y contenido demo actualizados!');
         console.log('📋 Cambios principales:');
         console.log('   - Eliminado campo price_per_number (cumplimiento legal)');
         console.log('   - Agregado campo access_code para simulaciones privadas');
         console.log('   - Agregado campo is_public para rifas de demostración');
         console.log('   - Rifas privadas solo accesibles mediante código');
-        console.log('   - Rifas públicas disponibles para experimentación');
+        console.log('   - Rifas públicas con contenido demo realista (FASE 15)');
+        console.log('   - Participantes y números simulados para mejor UX');
+        console.log('');
+        console.log('🎊 NOVEDADES FASE 15:');
+        console.log('   📱 iPhone 15 Pro - Sorteo corporativo con 12 participantes');
+        console.log('   👜 Cartera Premium - Cuero afgano con 10 participantes');
+        console.log('   ✈️ Viaje a Europa - Promoción especial con 16 participantes');
+        console.log('   🎯 Usuarios pueden explorar sin registrarse');
+        console.log('   🔍 Experiencia completa para usuarios anónimos');
 
         process.exit(0);
     } catch (error) {

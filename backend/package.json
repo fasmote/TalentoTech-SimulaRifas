@@ -8,7 +8,9 @@
     "dev": "nodemon app.js",
     "init-db": "node database/init.js",
     "sample-data": "node database/sample-data.js",
+    "demo-content": "node database/demo-content.js",
     "reset-db": "npm run init-db && npm run sample-data",
+    "reset-demo": "npm run init-db && npm run demo-content",
     "verify": "node verificar.js",
     "test": "npm run verify"
   },

@@ -1083,14 +1083,22 @@
         }
 
         function displayRifas(rifas) {
+            // Mapear emojis específicos para las rifas demo
+            const getEmojiForRifa = (title) => {
+                if (title.includes('iPhone')) return '📱';
+                if (title.includes('Cartera')) return '👜';
+                if (title.includes('Viaje') || title.includes('Europa')) return '✈️';
+                return '🎁';
+            };
+            
             let content = `
                 <div class="page-header">
                     <h1>🎊 Simulaciones Públicas</h1>
-                    <p class="subtitle">Explora simulaciones de ejemplo y practica</p>
+                    <p class="subtitle">Explora simulaciones de ejemplo y practica sin registrarte</p>
                 </div>
                 
                 <div class="legal-notice">
-                    <strong>Simulaciones de Demostración:</strong> Estas son simulaciones públicas creadas para fines educativos y de demostración. No involucran dinero real.
+                    <strong>Simulaciones de Demostración:</strong> Estas son simulaciones públicas creadas para fines educativos. Puedes participar sin registrarte para explorar la funcionalidad completa. No involucran dinero real.
                 </div>
                 
                 <div class="rifas-grid">
@@ -1099,32 +1107,71 @@
             if (rifas.length === 0) {
                 content += `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <p style="color: #666; font-size: 1.2rem;">No hay simulaciones públicas disponibles</p>
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🎊</div>
+                        <h3 style="color: #666; margin-bottom: 15px;">Cargando simulaciones...</h3>
+                        <p style="color: #666; font-size: 1rem;">El contenido demo se está preparando</p>
+                        <button class="btn btn-primary" onclick="showRifasPage()" style="margin-top: 20px;">
+                            🔄 Actualizar
+                        </button>
                     </div>
                 `;
             } else {
                 rifas.forEach(rifa => {
                     const progress = (rifa.numbers_sold / rifa.max_numbers) * 100;
+                    const emoji = getEmojiForRifa(rifa.title);
+                    const statusColor = progress > 70 ? '#ff9800' : progress > 40 ? '#4caf50' : '#2196f3';
+                    
                     content += `
-                        <div class="rifa-card">
-                            <div class="rifa-image">🎁</div>
-                            <h3>${rifa.title}</h3>
-                            <p class="rifa-description">${rifa.description || 'Sin descripción'}</p>
-                            <div class="rifa-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${progress}%"></div>
-                                </div>
-                                <span class="progress-text">${rifa.numbers_sold}/${rifa.max_numbers} números</span>
+                        <div class="rifa-card" style="position: relative; overflow: hidden;">
+                            <!-- Badge de Demo -->
+                            <div style="position: absolute; top: 10px; right: 10px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">
+                                DEMO
                             </div>
-                            <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                                <strong style="color: #2e7d32;">🆓 Simulación Gratuita</strong>
-                            </div>
-                            <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
-                                Por: ${rifa.creator_username}
+                            
+                            <div class="rifa-image" style="font-size: 4rem; margin-bottom: 15px;">${emoji}</div>
+                            <h3 style="margin-bottom: 10px;">${rifa.title}</h3>
+                            <p class="rifa-description" style="height: 60px; overflow: hidden; margin-bottom: 15px; line-height: 1.4;">
+                                ${rifa.description ? rifa.description.substring(0, 100) + (rifa.description.length > 100 ? '...' : '') : 'Simulación educativa de demostración'}
                             </p>
-                            <button class="btn btn-primary" onclick="participateInRifa(${rifa.id})">
-                                🎯 Participar
+                            
+                            <!-- Progress Bar Mejorada -->
+                            <div class="rifa-progress" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                    <span style="font-size: 0.9rem; font-weight: bold; color: #333;">Participación</span>
+                                    <span style="font-size: 0.8rem; color: ${statusColor}; font-weight: bold;">${Math.round(progress)}%</span>
+                                </div>
+                                <div class="progress-bar" style="height: 8px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                                    <div class="progress-fill" style="width: ${progress}%; background: linear-gradient(45deg, ${statusColor}, ${statusColor}dd); height: 100%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.8rem; color: #666;">
+                                    <span>👥 ${rifa.numbers_sold} participantes</span>
+                                    <span>🎯 ${rifa.max_numbers} total</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Badge de Simulación Gratuita -->
+                            <div style="background: linear-gradient(45deg, #4caf50, #8bc34a); color: white; padding: 8px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                                <strong style="font-size: 0.9rem;">🆓 Simulación Educativa</strong>
+                            </div>
+                            
+                            <!-- Info del Creador -->
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; margin-bottom: 15px; text-align: center;">
+                                <span style="font-size: 0.8rem; color: #666;">🏭 Creado por:</span>
+                                <div style="font-weight: bold; color: #333; margin-top: 2px;">${rifa.creator_username || 'Sistema Demo'}</div>
+                            </div>
+                            
+                            <!-- Botón de Acción -->
+                            <button class="btn btn-primary" onclick="participateInRifa(${rifa.id})" style="width: 100%; padding: 12px; font-weight: bold;">
+                                🎯 Explorar y Participar
                             </button>
+                            
+                            <!-- Indicador de Disponibilidad -->
+                            <div style="margin-top: 10px; text-align: center; font-size: 0.8rem;">
+                                ${progress < 90 ? 
+                                    '<span style="color: #4caf50;">✓ Disponible para participar</span>' : 
+                                    '<span style="color: #ff9800;">⚠️ Pocos lugares disponibles</span>'
+                                }
+                            </div>
                         </div>
                     `;
                 });
@@ -1132,8 +1179,32 @@
             
             content += `
                 </div>
+                
+                <!-- Sección informativa -->
+                <div style="background: white; border-radius: 15px; padding: 25px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #333;">🎓 ¿Cómo funcionan las simulaciones?</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🎯</div>
+                            <h4 style="color: #4caf50; margin-bottom: 8px;">1. Explora</h4>
+                            <p style="font-size: 0.9rem; color: #666;">Navega las simulaciones disponibles y elige la que más te interese</p>
+                        </div>
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🔢</div>
+                            <h4 style="color: #4caf50; margin-bottom: 8px;">2. Participa</h4>
+                            <p style="font-size: 0.9rem; color: #666;">Selecciona tus números favoritos sin necesidad de registro</p>
+                        </div>
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🎆</div>
+                            <h4 style="color: #4caf50; margin-bottom: 8px;">3. Aprende</h4>
+                            <p style="font-size: 0.9rem; color: #666;">Experimenta el proceso completo de manera segura y educativa</p>
+                        </div>
+                    </div>
+                </div>
+                
                 <div style="text-align: center; margin-top: 30px;">
                     <button class="btn btn-secondary" onclick="navigateTo('demo')">← Volver al Inicio</button>
+                    <button class="btn btn-success" onclick="showAuthModal()" style="margin-left: 10px;">➕ Crear Mis Simulaciones</button>
                 </div>
             `;
             
@@ -1505,8 +1576,8 @@
                         <strong>🔒 Simulación Privada</strong> - Accediste mediante código
                     </div>
                 ` : `
-                    <div class="legal-notice">
-                        <strong>Simulación Pública:</strong> Esta es una simulación de demostración sin valor monetario.
+                    <div style="background: linear-gradient(45deg, #e3f2fd, #f3e5f5); border: 1px solid #90caf9; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                    <strong style="color: #1565c0;">🎊 Simulación Pública de Demostración:</strong> Esta es una simulación educativa sin valor monetario. Puedes participar libremente para explorar la funcionalidad.
                     </div>
                 `}
 
