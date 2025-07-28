@@ -970,18 +970,18 @@
                             </div>
                         </div>
                         
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 15px;" onclick="drawWinner()">
+                            🎊 ¡Simular Sorteo!
+                        </button>
+                        
                         <div style="margin-bottom: 15px;">
                             <p style="font-size: 0.9rem; color: #666; text-align: center;">
                                 💡 ¿Quieres crear tus propias simulaciones privadas?
                             </p>
-                            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;" onclick="showAuthModal()">
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="showAuthModal()">
                                 👤 Iniciar Sesión
                             </button>
                         </div>
-                        
-                        <button class="btn btn-primary" style="width: 100%;" onclick="drawWinner()">
-                            🎊 ¡Simular Sorteo!
-                        </button>
                     </div>
                 </div>
             `;
@@ -1107,12 +1107,24 @@
             if (rifas.length === 0) {
                 content += `
                     <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <div style="font-size: 4rem; margin-bottom: 20px;">🎊</div>
-                        <h3 style="color: #666; margin-bottom: 15px;">Cargando simulaciones...</h3>
-                        <p style="color: #666; font-size: 1rem;">El contenido demo se está preparando</p>
-                        <button class="btn btn-primary" onclick="showRifasPage()" style="margin-top: 20px;">
-                            🔄 Actualizar
-                        </button>
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🚕</div>
+                        <h3 style="color: #666; margin-bottom: 15px;">¡Oops! No hay simulaciones públicas disponibles</h3>
+                        <p style="color: #666; font-size: 1rem; margin-bottom: 25px;">Parece que el contenido demo no se ha cargado aún.</p>
+                        
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 20px auto; max-width: 500px; text-align: left;">
+                            <h4 style="color: #856404; margin: 0 0 10px 0;">📋 Para el administrador:</h4>
+                            <p style="color: #856404; font-size: 0.9rem; margin-bottom: 10px;">Ejecuta en la terminal del backend:</p>
+                            <code style="background: #333; color: #0f0; padding: 8px; border-radius: 4px; display: block; font-family: 'Courier New', monospace;">npm run reset-demo</code>
+                        </div>
+                        
+                        <div style="margin-top: 25px;">
+                            <button class="btn btn-primary" onclick="showRifasPage()" style="margin-right: 10px;">
+                                🔄 Intentar de Nuevo
+                            </button>
+                            <button class="btn btn-secondary" onclick="navigateTo('demo')">
+                                🎲 Ir al Simulador
+                            </button>
+                        </div>
                     </div>
                 `;
             } else {
@@ -1161,8 +1173,8 @@
                             </div>
                             
                             <!-- Botón de Acción -->
-                            <button class="btn btn-primary" onclick="participateInRifa(${rifa.id})" style="width: 100%; padding: 12px; font-weight: bold;">
-                                🎯 Explorar y Participar
+                            <button class="btn btn-primary" onclick="participateInRifa(${rifa.id})" style="width: 100%; padding: 12px; font-weight: bold; background: linear-gradient(45deg, #4caf50, #8bc34a); border: none;">
+                                🎯 Participar Ahora
                             </button>
                             
                             <!-- Indicador de Disponibilidad -->
@@ -1695,7 +1707,14 @@
                 return;
             }
             
-            const participantName = document.getElementById('participantName')?.value || '';
+            const participantName = document.getElementById('participantName')?.value?.trim() || '';
+            
+            // NUEVA VALIDACIÓN: Nombre obligatorio cuando se accede por código
+            if (accessedByCode && !participantName) {
+                showNotification('Debes ingresar tu nombre para participar', 'error');
+                document.getElementById('participantName')?.focus();
+                return;
+            }
             
             try {
                 let endpoint, method;
@@ -1725,11 +1744,44 @@
                 
                 if (response.ok) {
                     showNotification(`¡Participación confirmada! Números: ${selectedNumbers.join(', ')}`);
+                    
+                    // NUEVA LÓGICA: Permanecer en la pantalla y actualizar
+                    // Limpiar selección actual
+                    selectedNumbers = [];
+                    updateCart();
+                    
+                    // Recargar información de la rifa para mostrar números actualizados
                     if (accessedByCode) {
-                        navigateTo('codigo');
+                        // Recargar rifa por código
+                        try {
+                            const updatedResponse = await fetch(`${API_BASE}/rifas/access/${currentRifa.access_code}`);
+                            const updatedData = await updatedResponse.json();
+                            if (updatedResponse.ok) {
+                                currentRifa = updatedData.rifa;
+                                generateRifaGrid(); // Regenerar grid con números actualizados
+                            }
+                        } catch (error) {
+                            console.error('Error actualizando información:', error);
+                        }
                     } else {
-                        navigateTo('rifas');
+                        // Recargar rifa pública
+                        try {
+                            const updatedResponse = await fetch(`${API_BASE}/rifas/${currentRifa.id}`);
+                            const updatedData = await updatedResponse.json();
+                            if (updatedResponse.ok) {
+                                currentRifa = updatedData.rifa;
+                                generateRifaGrid(); // Regenerar grid con números actualizados
+                            }
+                        } catch (error) {
+                            console.error('Error actualizando información:', error);
+                        }
                     }
+                    
+                    // Limpiar el campo de nombre para la próxima participación
+                    if (document.getElementById('participantName')) {
+                        document.getElementById('participantName').value = '';
+                    }
+                    
                 } else {
                     showNotification(data.error, 'error');
                 }
