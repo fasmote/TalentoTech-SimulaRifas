@@ -66,6 +66,8 @@ Cumplir con los requerimientos del PDF del proyecto final:
 - ✅ **BONUS UX**: Botón copiar código para móviles
 - ✅ **BONUS UX**: Botón "Participar" con color diferenciado (naranja)
 - ✅ **BONUS UX**: Título de simulación en sección "Mis Números"
+- ✅ **BONUS UX**: Botón "PARTICIPAR" duplicado en panel lateral
+- ✅ **FIX UX**: Subtitulo simulación propia muestra descripción real
 - **Prioridad**: ALTA - Funcionalidad crítica restaurada
 - **Estado**: ACCESO POR CÓDIGO COMPLETAMENTE FUNCIONAL + UX MEJORADA
 

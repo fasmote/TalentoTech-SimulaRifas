@@ -2001,7 +2001,7 @@
                     document.getElementById('mainContainer').innerHTML = `
                         <div class="page-header">
                             <h1>🎯 ${rifa.title}</h1>
-                            <p class="subtitle">Detalles de tu simulación</p>
+                            <p class="subtitle">${rifa.description}</p>
                         </div>
                         
                         <div style="margin-bottom: 20px;">
@@ -2334,12 +2334,12 @@
                             <div class="cart-count" id="cartCountCode">0</div>
                         </div>
                         
-                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #333; margin: 0; font-size: 1rem;">🎯 ${rifa.title}</h4>
-                        </div>
-                        
                         <div class="cart-items" id="cartItemsCode">
                             <div class="empty-cart">No has seleccionado números aún</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                            <h4 style="color: #333; margin: 0; font-size: 1rem;">🎯 ${rifa.title}</h4>
                         </div>
                         
                         <div style="margin-bottom: 20px;">
@@ -2366,6 +2366,9 @@
                             <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
                                 💡 ¿Te gusta esta simulación?
                             </p>
+                            <button class="btn btn-participate" onclick="showParticipateModal('${accessCode}')" id="participateBtnSide" disabled style="width: 100%; margin-bottom: 10px;">
+                                🎉 PARTICIPAR
+                            </button>
                             <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="showAuthModal()">
                                 🚀 Crear Mi Propia Simulación
                             </button>
@@ -2442,6 +2445,7 @@
             const cartItems = document.getElementById('cartItemsCode');
             const cartCount = document.getElementById('cartCountCode');
             const participateBtn = document.getElementById('participateBtn');
+            const participateBtnSide = document.getElementById('participateBtnSide'); // NUEVO: Botón lateral
             
             if (!cartItems || !cartCount || !participateBtn) return;
             
@@ -2450,10 +2454,12 @@
             if (selectedNumbers.length === 0) {
                 cartItems.innerHTML = '<div class="empty-cart">No has seleccionado números aún</div>';
                 participateBtn.disabled = true;
+                if (participateBtnSide) participateBtnSide.disabled = true; // NUEVO: Deshabilitar botón lateral
                 return;
             }
             
             participateBtn.disabled = false;
+            if (participateBtnSide) participateBtnSide.disabled = false; // NUEVO: Habilitar botón lateral
             
             const sortedNumbers = [...selectedNumbers].sort((a, b) => a - b);
             cartItems.innerHTML = sortedNumbers.map(number => `
