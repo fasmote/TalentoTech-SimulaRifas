@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Rifas - TalentoTech Fase 15d</title>
+    <title>Simulador de Rifas - TalentoTech</title>
     <style>
         * {
             margin: 0;
@@ -1233,7 +1233,7 @@
             document.getElementById('mainContainer').innerHTML = `
                 <header>
                     <h1>🎲 Simulador de Rifas</h1>
-                    <p class="subtitle">Simula sorteos para eventos, fiestas y actividades grupales - Fase 15d</p>
+                    <p class="subtitle">Simula sorteos para eventos, fiestas y actividades grupales</p>
                 </header>
 
                 <div class="legal-notice">
@@ -1697,6 +1697,9 @@
                                     <div style="margin-top: 15px;">
                                         <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
                                             🔑 Código: <strong>${rifa.access_code || 'Generando...'}</strong>
+                                            <button class="copy-code-btn" onclick="copyCode('${rifa.access_code}')" title="Copiar código" style="margin-left: 5px; padding: 3px 6px; font-size: 0.7rem;">
+                                                📋
+                                            </button>
                                         </p>
                                     </div>
                                     
@@ -2085,7 +2088,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/rifas/my/${rifaId}`, {
+                const response = await fetch(`${API_BASE}/rifas/${rifaId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -2116,7 +2119,7 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    showNotification(`¡Ganador: Número ${data.winner}!`);
+                    showNotification(`¡Ganador: Número ${data.winner.number}! Participante: ${data.winner.participant_name}`);
                     // Recargar vista para mostrar el ganador
                     viewRifa(rifaId);
                 } else {

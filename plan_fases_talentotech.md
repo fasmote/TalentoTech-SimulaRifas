@@ -68,6 +68,11 @@ Cumplir con los requerimientos del PDF del proyecto final:
 - ✅ **BONUS UX**: Título de simulación en sección "Mis Números"
 - ✅ **BONUS UX**: Botón "PARTICIPAR" duplicado en panel lateral
 - ✅ **FIX UX**: Subtitulo simulación propia muestra descripción real
+- ✅ **FIX CRITICAL**: Botón "Realizar Sorteo" endpoint corregido (/rifas/:id/draw)
+- ✅ **FIX CRITICAL**: Botón "Eliminar" endpoint corregido (/rifas/:id)
+- ✅ **FIX UX**: Eliminado texto "Fase 15d" de pantalla principal
+- ✅ **BONUS UX**: Botón copiar código en cards "Mis Simulaciones"
+- ✅ **FIX**: Confirmación eliminar simulación funcional
 - **Prioridad**: ALTA - Funcionalidad crítica restaurada
 - **Estado**: ACCESO POR CÓDIGO COMPLETAMENTE FUNCIONAL + UX MEJORADA
 
