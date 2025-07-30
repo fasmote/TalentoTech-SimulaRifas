@@ -1,8 +1,26 @@
-# 🎲 Simulador de Rifas - TalentoTech Fase 15
+# 🎲 Simulador de Rifas - TalentoTech Fase 15d
 
 Sistema completo de simulación de rifas con backend Node.js + Express + SQLite y frontend JavaScript vanilla.
 
-## 🌟 Novedades Fase 15
+## 🎆 ¡FASE 15d COMPLETADA! - Demo Content
+
+> ⚠️ **Si ves "No hay simulaciones públicas"**: Ejecuta `SOLUCION_TOTAL.bat` o lee `SOLUCION_URGENTE.md`
+
+### 🎁 Rifas Públicas Funcionales
+- ✅ **Sección "Simulaciones Públicas"** - Ahora muestra rifas reales
+- ✅ **3 rifas demo populadas** - iPhone 15 Pro, Cartera Premium, Viaje Europa
+- ✅ **Vista de detalles completa** - Números ocupados, estadísticas, progreso
+- ✅ **Participantes realistas** - 40+ usuarios con participaciones escalonadas
+- ✅ **API real integrada** - Frontend consume endpoints del backend
+
+### 📱 Experiencia de Usuario Mejorada
+- ✅ **Navegación fluida** - Entre lista y detalles de simulaciones
+- ✅ **Loading states** - Indicadores de carga mientras conecta
+- ✅ **Error handling** - Mensajes claros si no hay conexión
+- ✅ **UI responsiva** - Adaptación perfecta a móviles
+- ✅ **Emojis dinámicos** - 📱 iPhone, 👜 Cartera, ✈️ Viaje
+
+## 🌟 Novedades Anteriores (Fase 15)
 
 ### 🌍 Soporte Internacional
 - ✅ **Zona horaria automática** - Cada usuario ve fechas en su horario local
@@ -45,7 +63,16 @@ npm install
 ### 2. Inicializar base de datos con contenido demo
 
 ```bash
-# Inicializar con rifas públicas realistas
+# Opción 1: Script rápido (RECOMENDADO) 
+# Hacer doble clic en: SOLUCION_TOTAL.bat
+
+# Opción 2: Comando directo
+node database\init.js
+
+# Opción 3: Script alternativo
+npm run demo-content
+
+# Opción 4: Reset completo 
 npm run reset-demo
 
 # Verificar que todo funcione

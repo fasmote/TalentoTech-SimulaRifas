@@ -57,6 +57,43 @@ router.get('/my', authenticateToken, async (req, res) => {
     }
 });
 
+// Obtener una rifa específica del usuario logueado
+router.get('/my/:id', authenticateToken, async (req, res) => {
+    try {
+        const rifa = await getQuery(`
+            SELECT 
+                r.*,
+                u.username as creator_username,
+                COUNT(rn.id) as numbers_sold
+            FROM rifas r
+            LEFT JOIN users u ON r.user_id = u.id
+            LEFT JOIN rifa_numbers rn ON r.id = rn.rifa_id
+            WHERE r.id = ? AND r.user_id = ?
+            GROUP BY r.id
+        `, [req.params.id, req.user.id]);
+
+        if (!rifa) {
+            return res.status(404).json({ error: 'Simulación no encontrada o no tienes permisos' });
+        }
+
+        // Obtener números seleccionados
+        const soldNumbers = await allQuery(
+            'SELECT number FROM rifa_numbers WHERE rifa_id = ?',
+            [req.params.id]
+        );
+
+        res.json({ 
+            rifa: {
+                ...rifa,
+                sold_numbers: soldNumbers.map(n => n.number)
+            }
+        });
+    } catch (error) {
+        console.error('Error obteniendo rifa del usuario:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Obtener una rifa específica por ID (solo públicas o del propietario)
 router.get('/:id', async (req, res) => {
     try {

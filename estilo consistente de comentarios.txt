@@ -1,0 +1,9 @@
+Tipos de Prefijos Consistentes
+
+FIX: Corrección de bugs/problemas
+FEAT: Nueva funcionalidad
+DOC: Documentación
+REFACTOR: Reestructuración de código
+STYLE: Cambios de formato/estilo
+TEST: Pruebas
+CHORE: Tareas de mantenimiento

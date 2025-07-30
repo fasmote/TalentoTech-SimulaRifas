@@ -22,6 +22,30 @@ const createDemoContent = async () => {
             await runQuery('DELETE FROM rifas WHERE is_public = TRUE');
         }
 
+        // Crear o obtener usuario del sistema para rifas públicas
+        let systemUserId;
+        try {
+            // Intentar obtener usuario admin existente
+            const adminUser = await getQuery('SELECT id FROM users WHERE username = ?', ['admin']);
+            if (adminUser) {
+                systemUserId = adminUser.id;
+                console.log('👤 Usando usuario admin existente (ID: ' + systemUserId + ')');
+            } else {
+                // Crear usuario del sistema para rifas públicas
+                const bcrypt = require('bcryptjs');
+                const hashedPassword = await bcrypt.hash('admin123', 10);
+                const newUser = await runQuery(`
+                    INSERT INTO users (username, email, password, created_at) 
+                    VALUES (?, ?, ?, datetime('now'))
+                `, ['admin', 'admin@sistema.demo', hashedPassword]);
+                systemUserId = newUser.id;
+                console.log('👤 Usuario del sistema creado (ID: ' + systemUserId + ')');
+            }
+        } catch (error) {
+            console.error('❌ Error gestionando usuario del sistema:', error.message);
+            return;
+        }
+        
         // RIFAS PÚBLICAS DE DEMOSTRACIÓN - FASE 15
         const rifasDemo = [
             {
@@ -76,7 +100,7 @@ const createDemoContent = async () => {
                     user_id, title, description, access_code, 
                     is_public, status, max_numbers, created_at
                 ) VALUES (?, ?, ?, ?, TRUE, 'active', 100, datetime('now'))
-            `, [null, rifa.title, rifa.description, accessCode]);
+            `, [systemUserId, rifa.title, rifa.description, accessCode]);
 
             const rifaId = result.id;
             console.log(`🎁 Rifa "${rifa.title}" creada (ID: ${rifaId}, Código: ${accessCode})`);
