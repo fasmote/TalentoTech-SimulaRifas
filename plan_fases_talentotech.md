@@ -19,7 +19,7 @@ Cumplir con los requerimientos del PDF del proyecto final:
 
 ---
 
-## 🚨 **Estado Actual - Fase 15f**
+## 🚨 **Estado Actual - Fase 15g**
 
 ### **✅ PROBLEMAS RESUELTOS**
 - ✅ **Funcionalidad "Crear"** - Era hardcodeada, ahora funcional
@@ -27,6 +27,7 @@ Cumplir con los requerimientos del PDF del proyecto final:
 - ✅ **Función editRifa()** - Usando endpoint correcto `/rifas/my/:id`
 - ✅ **Event listeners** - Formularios de crear y editar funcionando
 - ✅ **Backend endpoints** - Agregado `/rifas/my/:id` para rifas del usuario
+- ✅ **Acceso por código** - Corregido problema de IDs duplicados y event listeners
 
 ### **🟡 MEJORAS NECESARIAS**
 - 🟡 Sección "Rifas Públicas" requiere contenido demo
@@ -54,7 +55,18 @@ Cumplir con los requerimientos del PDF del proyecto final:
 - ✅ **BONUS**: Acceso por código implementado y funcional
 - **Estado**: FUNCIONALIDAD BÁSICA COMPLETAMENTE RESTAURADA
 
-### **FASE 15** - Demo Content 📋
+### **FASE 15g** - Arreglo Acceso por Código ✅ COMPLETADA
+**Objetivo**: Corregir problema de acceso por código
+- ✅ Eliminado modal duplicado de acceso por código
+- ✅ Corregidos IDs duplicados (accessCodeForm)
+- ✅ Mejorado event listener dinámico para formulario de página
+- ✅ Agregado feedback visual (loading) en botones
+- ✅ Mejorado manejo de errores con restauración de botones
+- ✅ Simplificado código eliminando funciones no utilizadas
+- **Prioridad**: ALTA - Funcionalidad crítica restaurada
+- **Estado**: ACCESO POR CÓDIGO COMPLETAMENTE FUNCIONAL
+
+### **FASE 15h** - Demo Content 📋
 **Objetivo**: Contenido para usuarios anónimos
 - Crear 3 rifas públicas hardcodeadas:
   - "iPhone 15 Pro" - Sorteo corporativo

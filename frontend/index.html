@@ -854,23 +854,7 @@
         </div>
     </div>
 
-    <!-- Modal de Acceso por Código -->
-    <div class="modal" id="accessCodeModal" style="display: none;">
-        <div class="modal-content">
-            <h2>🔑 Acceder por Código</h2>
-            <p style="text-align: center; margin-bottom: 20px; color: #666;">
-                Ingresa el código de 6 caracteres para acceder a la simulación
-            </p>
-            <form id="accessCodeForm">
-                <input type="text" id="accessCodeInput" placeholder="XXXXXX" class="form-input access-code-input" 
-                       maxlength="6" pattern="[A-Za-z0-9]{6}" required>
-                <div class="modal-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="closeAccessCodeModal()">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Acceder</button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <!-- NUEVO FASE 15C: Modal de Editar Simulación -->
     <div class="modal" id="editRifaModal" style="display: none;">
@@ -1597,8 +1581,8 @@
                             Ingresa el código de 6 caracteres para acceder a la simulación
                         </p>
                         
-                        <form id="accessCodeForm">
-                            <input type="text" id="accessCodeInput" placeholder="XXXXXX" class="form-input access-code-input" 
+                        <form id="accessCodePageForm">
+                            <input type="text" id="accessCodePageInput" placeholder="XXXXXX" class="form-input access-code-input" 
                                    maxlength="6" pattern="[A-Za-z0-9]{6}" required style="margin-bottom: 20px;">
                             <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 15px;">
                                 🔍 Acceder a Simulación
@@ -1625,6 +1609,14 @@
                     </div>
                 </div>
             `;
+            
+            // CORREGIDO: Agregar event listener después de crear el HTML
+            setTimeout(() => {
+                const form = document.getElementById('accessCodePageForm');
+                if (form) {
+                    form.addEventListener('submit', handleAccessCodeSubmit);
+                }
+            }, 100);
         }
 
         async function showPerfilPage() {
@@ -2192,31 +2184,45 @@
             }
         });
 
-        document.getElementById('accessCodeForm').addEventListener('submit', async function(e) {
+        // NUEVA FUNCIÓN: Manejar acceso por código
+        async function handleAccessCodeSubmit(e) {
             e.preventDefault();
             
-            const code = document.getElementById('accessCodeInput').value.trim().toUpperCase();
+            const code = document.getElementById('accessCodePageInput').value.trim().toUpperCase();
             
             if (!code || code.length !== 6) {
                 showNotification('Por favor ingresa un código válido de 6 caracteres', 'error');
                 return;
             }
             
+            // Mostrar loading
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '🔄 Buscando...';
+            submitBtn.disabled = true;
+            
             try {
                 const response = await fetch(`${API_BASE}/rifas/access/${code}`);
                 const data = await response.json();
                 
-                if (response.ok) {
+                if (response.ok && data.rifa) {
+                    showNotification('✅ ¡Simulación encontrada!');
                     // Mostrar simulación encontrada
                     viewRifaByCode(data.rifa, code);
                 } else {
-                    showNotification(data.error || 'Código no válido', 'error');
+                    showNotification(data.error || `Código "${code}" no encontrado`, 'error');
+                    // Restaurar botón
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('Error de conexión', 'error');
+                showNotification('Error de conexión con el servidor', 'error');
+                // Restaurar botón
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
-        });
+        }
 
         // ========== FUNCIÓN ACCESO POR CÓDIGO ==========
         
@@ -2422,6 +2428,12 @@
                     return;
                 }
                 
+                // Mostrar loading en botón
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '🔄 Confirmando...';
+                submitBtn.disabled = true;
+                
                 try {
                     const response = await fetch(`${API_BASE}/rifas/access/${accessCode}/numbers`, {
                         method: 'POST',
@@ -2448,10 +2460,16 @@
                         }
                     } else {
                         showNotification(data.error || 'Error en participación', 'error');
+                        // Restaurar botón
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     showNotification('Error de conexión', 'error');
+                    // Restaurar botón
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
                 }
             });
         }

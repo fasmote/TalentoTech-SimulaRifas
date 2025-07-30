@@ -1,0 +1,19 @@
+git commit -m "FIX: Botones Ver/Editar funcionales - endpoints rifas privadas corregidos
+
+- FIX: viewRifa/editRifa usando /rifas/my/:id correcto
+- FIX: showCreateRifaModal hardcode removido  
+- FEAT: Backend endpoint /rifas/my/:id agregado
+- FIX: Event listeners formularios implementados
+
+CRUD básico restaurado
+FIX: Mensajes hardcodeados y acceso por código completamente funcional
+
+- FIX: Mensaje "función en desarrollo" cambiado por llamada a acción positiva
+- FEAT: Acceso por código completamente implementado con participación anónima
+- FEAT: Modal de participación con nombre para usuarios sin registro  
+- FEAT: Actualización automática de números ocupados tras participación
+- FIX: Interfaz responsive para acceso por código
+- FEAT: Validación de códigos de 6 caracteres con feedback claro
+
+Estado: Todas las funcionalidades principales operativas
+Acceso por código: usuarios pueden participar sin registrar"
