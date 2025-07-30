@@ -1804,6 +1804,8 @@
                 
                 if (response.ok && data.rifa) {
                     const rifa = data.rifa;
+                    const isCompleted = rifa.status === 'completed';
+                    const winnerNumber = rifa.winner ? rifa.winner.number : null;
                     const emoji = rifa.title.includes('iPhone') ? '📱' : 
                                  rifa.title.includes('Cartera') ? '👜' : '✈️';
                     const progressPercent = rifa.max_numbers ? Math.round((rifa.numbers_sold / rifa.max_numbers) * 100) : 0;
@@ -1812,7 +1814,15 @@
                     let numbersGridHtml = '';
                     for (let i = 0; i <= 99; i++) {
                         const isSelected = rifa.sold_numbers && rifa.sold_numbers.includes(i);
-                        const cellClass = isSelected ? 'number-cell sold' : 'number-cell';
+                        const isWinner = winnerNumber === i;
+                        let cellClass = 'number-cell';
+                        
+                        if (isWinner) {
+                            cellClass = 'number-cell winner';
+                        } else if (isSelected) {
+                            cellClass = 'number-cell sold';
+                        }
+                        
                         numbersGridHtml += `<div class="${cellClass}">${i.toString().padStart(2, '0')}</div>`;
                     }
                     
@@ -2005,6 +2015,9 @@
                         <div class="page-header">
                             <h1>🎯 ${rifa.title}</h1>
                             <p class="subtitle">${rifa.description}</p>
+                            ${isCompleted ? `<p style="background: #4caf50; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-top: 10px;">
+                                🏆 ¡SIMULACIÓN COMPLETADA! Ganador: Número ${winnerNumber} (${rifa.winner.participant_name})
+                            </p>` : ''}
                         </div>
                         
                         <div style="margin-bottom: 20px;">
@@ -2034,8 +2047,15 @@
                             <div class="cart-section">
                                 <div class="cart-header">
                                     <span class="cart-icon">🎯</span>
-                                    <h3 class="cart-title">Información</h3>
+                                    <h3 class="cart-title">${isCompleted ? 'Resultado Final' : 'Información'}</h3>
                                 </div>
+                                
+                                ${isCompleted ? `
+                                <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; text-align: center; border: 2px solid #ffd700;">
+                                    <h4 style="color: #856404; margin: 0 0 10px 0; font-size: 1.1rem;">🏆 ¡GANADOR!</h4>
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: #ffd700; margin: 10px 0;">${winnerNumber}</div>
+                                    <p style="color: #856404; margin: 0; font-weight: bold; font-size: 1.1rem;">${rifa.winner.participant_name}</p>
+                                </div>` : ''}
                                 
                                 <div style="margin-bottom: 20px;">
                                     <h4 style="color: #333; margin-bottom: 10px;">📝 Descripción</h4>
@@ -2061,9 +2081,13 @@
                                     <p style="font-size: 0.8rem; color: #666; text-align: center;">Comparte este código para que otros participen</p>
                                 </div>
                                 
+                                ${!isCompleted ? `
                                 <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="drawRifaWinner(${rifaId})">
                                     🏆 Realizar Sorteo
-                                </button>
+                                </button>` : `
+                                <div style="text-align: center; padding: 15px; background: #e8f5e8; border-radius: 8px; margin-bottom: 10px;">
+                                    <p style="color: #2e7d32; font-weight: bold; margin: 0;">✓ Sorteo Completado</p>
+                                </div>`}
                                 
                                 <button class="btn btn-primary" style="width: 100%;" onclick="editRifa(${rifaId})">
                                     ✏️ Editar Simulación
@@ -2298,10 +2322,16 @@
         // ========== FUNCIÓN ACCESO POR CÓDIGO ==========
         
         async function viewRifaByCode(rifa, accessCode) {
+            const isCompleted = rifa.status === 'completed';
+            const winnerNumber = rifa.winner ? rifa.winner.number : null;
+            
             document.getElementById('mainContainer').innerHTML = `
                 <div class="page-header">
                     <h1>🎯 ${rifa.title}</h1>
                     <p class="subtitle">Simulación privada - Acceso por código: ${accessCode}</p>
+                    ${isCompleted ? `<p style="background: #4caf50; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-top: 10px;">
+                        🏆 ¡SIMULACIÓN COMPLETADA! Ganador: Número ${winnerNumber} (${rifa.winner.participant_name})
+                    </p>` : ''}
                 </div>
                 
                 <div style="margin-bottom: 20px;">
@@ -2311,39 +2341,56 @@
                 </div>
                 
                 <div class="legal-notice">
-                    <strong>Participación Anónima:</strong> Puedes participar sin registrarte. Los números en rojo ya están ocupados.
+                    <strong>${isCompleted ? 'Simulación Finalizada:' : 'Participación Anónima:'}</strong> 
+                    ${isCompleted ? 
+                        'Esta simulación ya fue sorteada. Los números en rojo estaban ocupados y el número dorado es el ganador.' : 
+                        'Puedes participar sin registrarte. Los números en rojo ya están ocupados.'}
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 350px; gap: 30px;" class="rifa-details-grid">
                     <div class="numbers-section">
                         <h3 style="margin-bottom: 15px;">🎯 Números de la Simulación</h3>
-                        <p style="color: #666; margin-bottom: 20px;">Haz click en los números disponibles para participar</p>
+                        ${isCompleted ? 
+                            '<p style="color: #666; margin-bottom: 20px;">Simulación finalizada - Ver resultados</p>' :
+                            '<p style="color: #666; margin-bottom: 20px;">Haz click en los números disponibles para participar</p>'
+                        }
                         
                         <div class="numbers-grid" id="numbersGridCode">
                             <!-- Los números se generan con JavaScript -->
                         </div>
                         
+                        ${!isCompleted ? `
                         <div style="margin-top: 20px;">
                             <button class="btn btn-participate" id="participateBtn" onclick="showParticipateModal('${accessCode}')" disabled>
-                            🎉 Participar en Simulación
+                                🎉 Participar en Simulación
                             </button>
-                        </div>
+                        </div>` : ''}
                     </div>
                     
                     <div class="cart-section">
                         <div class="cart-header">
                             <span class="cart-icon">🎯</span>
-                            <h3 class="cart-title">Mis Números</h3>
-                            <div class="cart-count" id="cartCountCode">0</div>
+                            <h3 class="cart-title">${isCompleted ? 'Resultado' : 'Mis Números'}</h3>
+                            ${!isCompleted ? '<div class="cart-count" id="cartCountCode">0</div>' : ''}
                         </div>
                         
+                        ${!isCompleted ? `
                         <div class="cart-items" id="cartItemsCode">
                             <div class="empty-cart">No has seleccionado números aún</div>
                         </div>
                         
                         <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; text-align: center;">
                             <h4 style="color: #333; margin: 0; font-size: 1rem;">🎯 ${rifa.title}</h4>
+                        </div>` : `
+                        <div style="margin-bottom: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; text-align: center; border: 2px solid #ffd700;">
+                            <h4 style="color: #856404; margin: 0 0 10px 0; font-size: 1.1rem;">🏆 ¡GANADOR!</h4>
+                            <div style="font-size: 2rem; font-weight: bold; color: #ffd700; margin: 10px 0;">${winnerNumber}</div>
+                            <p style="color: #856404; margin: 0; font-weight: bold;">${rifa.winner.participant_name}</p>
                         </div>
+                        
+                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                            <h4 style="color: #333; margin: 0; font-size: 1rem;">🎯 ${rifa.title}</h4>
+                        </div>`}
                         
                         <div style="margin-bottom: 20px;">
                             <h4 style="color: #333; margin-bottom: 10px;">📝 Descripción</h4>
@@ -2362,16 +2409,18 @@
                             <h4 style="color: #333; margin-bottom: 10px;">ℹ️ Detalles</h4>
                             <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">• Creador: ${rifa.creator_username || 'Privado'}</p>
                             <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">• Tipo: Simulación privada</p>
-                            <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">• Estado: ${rifa.status === 'active' ? 'Activa' : 'Finalizada'}</p>
+                            <p style="color: #666; font-size: 0.9rem; margin: 5px 0;">• Estado: ${isCompleted ? 'Finalizada' : 'Activa'}</p>
+                            ${isCompleted ? `<p style="color: #666; font-size: 0.9rem; margin: 5px 0;">• Ganador: Número ${winnerNumber}</p>` : ''}
                         </div>
                         
                         <div style="text-align: center; margin-top: 20px;">
                             <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
                                 💡 ¿Te gusta esta simulación?
                             </p>
+                            ${!isCompleted ? `
                             <button class="btn btn-participate" onclick="showParticipateModal('${accessCode}')" id="participateBtnSide" disabled style="width: 100%; margin-bottom: 10px;">
                                 🎉 PARTICIPAR
-                            </button>
+                            </button>` : ''}
                             <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="showAuthModal()">
                                 🚀 Crear Mi Propia Simulación
                             </button>
@@ -2389,11 +2438,13 @@
             accessedByCode = true;
             
             // Generar grid de números
-            generateNumbersGridForCode(rifa.sold_numbers || []);
-            updateCartForCode();
+            generateNumbersGridForCode(rifa.sold_numbers || [], winnerNumber, isCompleted);
+            if (!isCompleted) {
+                updateCartForCode();
+            }
         }
         
-        function generateNumbersGridForCode(soldNumbers) {
+        function generateNumbersGridForCode(soldNumbers, winnerNumber = null, isCompleted = false) {
             const grid = document.getElementById('numbersGridCode');
             if (!grid) return;
             
@@ -2402,11 +2453,20 @@
             for (let i = 0; i <= 99; i++) {
                 const cell = document.createElement('div');
                 const isSold = soldNumbers.includes(i);
+                const isWinner = winnerNumber === i;
                 
-                cell.className = isSold ? 'number-cell sold' : 'number-cell';
+                if (isWinner) {
+                    cell.className = 'number-cell winner';
+                } else if (isSold) {
+                    cell.className = 'number-cell sold';
+                } else {
+                    cell.className = 'number-cell';
+                }
+                
                 cell.textContent = i.toString().padStart(2, '0');
                 
-                if (!isSold) {
+                // Solo permitir clicks si no está completada y no está vendido
+                if (!isCompleted && !isSold && !isWinner) {
                     cell.onclick = () => toggleNumberForCode(i);
                 }
                 

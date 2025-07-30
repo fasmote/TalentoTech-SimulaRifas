@@ -78,14 +78,28 @@ router.get('/my/:id', authenticateToken, async (req, res) => {
 
         // Obtener números seleccionados
         const soldNumbers = await allQuery(
-            'SELECT number FROM rifa_numbers WHERE rifa_id = ?',
+            'SELECT number, participant_name FROM rifa_numbers WHERE rifa_id = ?',
             [req.params.id]
         );
+
+        // Si la simulación está completada, obtener información del ganador
+        let winnerInfo = null;
+        if (rifa.status === 'completed' && rifa.winner_number !== null) {
+            const winner = await getQuery(
+                'SELECT participant_name FROM rifa_numbers WHERE rifa_id = ? AND number = ?',
+                [rifa.id, rifa.winner_number]
+            );
+            winnerInfo = {
+                number: rifa.winner_number,
+                participant_name: winner ? winner.participant_name : 'Desconocido'
+            };
+        }
 
         res.json({ 
             rifa: {
                 ...rifa,
-                sold_numbers: soldNumbers.map(n => n.number)
+                sold_numbers: soldNumbers.map(n => n.number),
+                winner: winnerInfo
             }
         });
     } catch (error) {
@@ -147,7 +161,7 @@ router.get('/access/:code', async (req, res) => {
             FROM rifas r
             LEFT JOIN users u ON r.user_id = u.id
             LEFT JOIN rifa_numbers rn ON r.id = rn.rifa_id
-            WHERE UPPER(r.access_code) = ? AND r.status = 'active'
+            WHERE UPPER(r.access_code) = ?
             GROUP BY r.id
         `, [code]);
 
@@ -157,14 +171,28 @@ router.get('/access/:code', async (req, res) => {
 
         // Obtener números seleccionados
         const soldNumbers = await allQuery(
-            'SELECT number FROM rifa_numbers WHERE rifa_id = ?',
+            'SELECT number, participant_name FROM rifa_numbers WHERE rifa_id = ?',
             [rifa.id]
         );
+
+        // Si la simulación está completada, obtener información del ganador
+        let winnerInfo = null;
+        if (rifa.status === 'completed' && rifa.winner_number !== null) {
+            const winner = await getQuery(
+                'SELECT participant_name FROM rifa_numbers WHERE rifa_id = ? AND number = ?',
+                [rifa.id, rifa.winner_number]
+            );
+            winnerInfo = {
+                number: rifa.winner_number,
+                participant_name: winner ? winner.participant_name : 'Desconocido'
+            };
+        }
 
         res.json({ 
             rifa: {
                 ...rifa,
-                sold_numbers: soldNumbers.map(n => n.number)
+                sold_numbers: soldNumbers.map(n => n.number),
+                winner: winnerInfo
             }
         });
     } catch (error) {
