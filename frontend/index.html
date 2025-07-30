@@ -594,8 +594,38 @@
             font-size: 0.9rem;
         }
 
-        .legal-notice strong {
-            color: #856404;
+        /* NUEVO: Botón de copiar código */
+        .copy-code-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-code-btn:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+        
+        .copy-code-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* NUEVO: Botón participar diferenciado */
+        .btn-participate {
+            background: linear-gradient(45deg, #ff9500, #ff6b00);
+            color: white;
+        }
+        
+        .btn-participate:hover {
+            background: linear-gradient(45deg, #e68900, #e65f00);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 149, 0, 0.3);
         }
         
         /* NUEVO FASE 15C: Toggle de contraseña mejorado */
@@ -2019,8 +2049,11 @@
                                 
                                 <div style="margin-bottom: 20px;">
                                     <h4 style="color: #333; margin-bottom: 10px;">🔑 Código de Acceso</h4>
-                                    <div class="access-code-display">
-                                        ${rifa.access_code || 'GENERANDO...'}
+                                    <div class="access-code-display" style="display: flex; align-items: center; justify-content: space-between;">
+                                        <span id="displayCode">${rifa.access_code || 'GENERANDO...'}</span>
+                                        <button class="copy-code-btn" onclick="copyCode('${rifa.access_code}')" title="Copiar código">
+                                            📋
+                                        </button>
                                     </div>
                                     <p style="font-size: 0.8rem; color: #666; text-align: center;">Comparte este código para que otros participen</p>
                                 </div>
@@ -2184,7 +2217,42 @@
             }
         });
 
-        // NUEVA FUNCIÓN: Manejar acceso por código
+        // NUEVA FUNCIÓN: Copiar código al portapapeles
+        async function copyCode(code) {
+            if (!code || code === 'GENERANDO...') {
+                showNotification('No hay código disponible para copiar', 'error');
+                return;
+            }
+            
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    // Usar Clipboard API (moderno)
+                    await navigator.clipboard.writeText(code);
+                    showNotification(`Código ${code} copiado al portapapeles`);
+                } else {
+                    // Fallback para navegadores más antiguos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showNotification(`Código ${code} copiado al portapapeles`);
+                    } catch (err) {
+                        showNotification('Error al copiar código', 'error');
+                    }
+                    
+                    document.body.removeChild(textArea);
+                }
+            } catch (err) {
+                console.error('Error copiando código:', err);
+                showNotification('Error al copiar código', 'error');
+            }
+        }
         async function handleAccessCodeSubmit(e) {
             e.preventDefault();
             
@@ -2253,8 +2321,8 @@
                         </div>
                         
                         <div style="margin-top: 20px;">
-                            <button class="btn btn-success" id="participateBtn" onclick="showParticipateModal('${accessCode}')" disabled>
-                                🎉 Participar en Simulación
+                            <button class="btn btn-participate" id="participateBtn" onclick="showParticipateModal('${accessCode}')" disabled>
+                            🎉 Participar en Simulación
                             </button>
                         </div>
                     </div>
@@ -2264,6 +2332,10 @@
                             <span class="cart-icon">🎯</span>
                             <h3 class="cart-title">Mis Números</h3>
                             <div class="cart-count" id="cartCountCode">0</div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; text-align: center;">
+                            <h4 style="color: #333; margin: 0; font-size: 1rem;">🎯 ${rifa.title}</h4>
                         </div>
                         
                         <div class="cart-items" id="cartItemsCode">
