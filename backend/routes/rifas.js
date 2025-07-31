@@ -481,6 +481,84 @@ router.post('/:id/draw', authenticateToken, async (req, res) => {
     }
 });
 
+// NUEVA RUTA FASE 15N: Participar en simulación por ID
+router.post('/:id/participate', async (req, res) => {
+    try {
+        const { numbers, participant_name } = req.body;
+        const rifaId = req.params.id;
+
+        console.log(`📝 [PARTICIPATE] Recibida participación - Rifa ID: ${rifaId}, Participante: ${participant_name}, Números: [${numbers.join(', ')}]`);
+
+        if (!numbers || !Array.isArray(numbers)) {
+            return res.status(400).json({ error: 'Números inválidos' });
+        }
+
+        if (!participant_name || participant_name.trim() === '') {
+            return res.status(400).json({ error: 'El nombre del participante es requerido' });
+        }
+
+        // Verificar que la simulación existe y está activa
+        const rifa = await getQuery(
+            'SELECT * FROM rifas WHERE id = ? AND status = ?',
+            [rifaId, 'active']
+        );
+
+        if (!rifa) {
+            return res.status(404).json({ error: 'Simulación no encontrada o no está activa' });
+        }
+
+        console.log(`✅ [PARTICIPATE] Simulación encontrada: "${rifa.title}"`);
+
+        // Verificar números disponibles
+        const soldNumbers = await allQuery(
+            'SELECT number FROM rifa_numbers WHERE rifa_id = ?',
+            [rifaId]
+        );
+        
+        const soldNumbersArray = soldNumbers.map(n => n.number);
+        const invalidNumbers = numbers.filter(n => soldNumbersArray.includes(n));
+
+        if (invalidNumbers.length > 0) {
+            console.log(`❌ [PARTICIPATE] Números ocupados: [${invalidNumbers.join(', ')}]`);
+            return res.status(400).json({ 
+                error: `Los números ${invalidNumbers.join(', ')} ya están ocupados` 
+            });
+        }
+
+        // Insertar números seleccionados
+        for (const number of numbers) {
+            await runQuery(`
+                INSERT INTO rifa_numbers (rifa_id, number, participant_name) 
+                VALUES (?, ?, ?)
+            `, [rifaId, number, participant_name]);
+            console.log(`✅ [PARTICIPATE] Número ${number} registrado para ${participant_name}`);
+        }
+
+        // Obtener información actualizada de la simulación
+        const updatedRifa = await getQuery(`
+            SELECT 
+                r.*,
+                COUNT(rn.id) as numbers_sold
+            FROM rifas r
+            LEFT JOIN rifa_numbers rn ON r.id = rn.rifa_id
+            WHERE r.id = ?
+            GROUP BY r.id
+        `, [rifaId]);
+
+        console.log(`🎯 [PARTICIPATE] Participación exitosa - ${numbers.length} números registrados`);
+
+        res.json({ 
+            message: `¡Participación exitosa! ${numbers.length} números registrados para ${participant_name}`,
+            numbers,
+            participant_name,
+            rifa: updatedRifa
+        });
+    } catch (error) {
+        console.error('❌ [ERROR] Error en participación:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+});
+
 // Regenerar código de acceso
 router.post('/:id/regenerate-code', authenticateToken, async (req, res) => {
     try {
