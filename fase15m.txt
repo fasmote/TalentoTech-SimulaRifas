@@ -1,0 +1,5 @@
+* 2.- Cuando alguien logueado, pone un codigo de otra persona, al presionar el botón participar, que quede como nombre el nombre del logueado con el que aparece arriba a la derecha, su perfil.
+
+Talento Tech fase15m:
+* puedes separar el css y js del html? 
+* en la fase15i y 15l te habia pedido 2 cosas, pausalas hasta separar css y js del html, te digo en otro chat cuando arrancar.
