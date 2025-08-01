@@ -1,59 +1,47 @@
-# Dependencias de Node.js
+# Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+*/node_modules/
 
-# Base de datos SQLite
-*.db
-*.sqlite
-*.sqlite3
-
-# Variables de entorno
+# Environment variables
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
 # Logs
-logs/
 *.log
-
-# Archivos temporales
-tmp/
-temp/
-
-# Archivos del sistema
-.DS_Store
-Thumbs.db
-
-# Editores
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Backup files
-*.bak
-*.backup
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
 
 # Runtime data
-pids/
+pids
 *.pid
 *.seed
 *.pid.lock
 
 # Coverage directory used by tools like istanbul
 coverage/
+*.lcov
 
 # nyc test coverage
-.nyc_output/
+.nyc_output
 
 # Dependency directories
 jspm_packages/
 
 # Optional npm cache directory
 .npm
+
+# Optional eslint cache
+.eslintcache
 
 # Optional REPL history
 .node_repl_history
@@ -64,27 +52,57 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env.test
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# next.js build output
-.next
+# Backup files
+*.bak
+*.backup
+*_backup.*
+*.temp
+*.tmp
 
-# nuxt.js build output
-.nuxt
+# Archivos específicos del proyecto - FASE 15u
+FASE*.md
+FASE*.js
+FASE*.bat
+FASE*.txt
+DIAGNOSTICO*.js
+fix_*.js
+SOLUCION*.bat
+SOLUCION*.md
+VERIFICACION*.md
+INSTRUCCIONES*.md
+RESUMEN*.md
+FUNCION*.js
+GITHUB*.md
+DESARROLLO.md
+CHANGELOG.md
+ultimos*.txt
+estilo*.txt
+*.md~
+aplicar_*.js
+diagnostico_*.js
+ejecutar_*.bat
+ACTIVAR_*.bat
+EJECUTAR_*.bat
+INICIAR.bat
 
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
+# Mantener solo archivos esenciales para producción
+# README.md - ✓
+# PRODUCTO.md - ✓  
+# LICENSE - ✓
+# .env.example - ✓

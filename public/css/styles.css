@@ -1,5 +1,9 @@
-/* FASE 15M: Estilos separados del HTML - TalentoTech SimulaRifas */
+/* SIMULADOR DE RIFAS - ESTILOS PRINCIPALES
+   Proyecto TalentoTech - SimulaRifas
+   Archivo: styles.css
+   ========================================= */
 
+/* Reset y Base */
 * {
     margin: 0;
     padding: 0;
@@ -15,7 +19,7 @@ body {
     padding-top: 80px;
 }
 
-/* Navegación CORREGIDA - Fase 15c */
+/* ========== NAVEGACIÓN ========== */
 .navbar {
     position: fixed;
     top: 0;
@@ -80,7 +84,6 @@ body {
     color: white;
 }
 
-/* Nav user alineación mejorada - FASE 15E */
 .nav-user {
     display: flex;
     align-items: center;
@@ -108,6 +111,7 @@ body {
     color: #333;
 }
 
+/* ========== LAYOUT PRINCIPAL ========== */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -150,6 +154,7 @@ h1 {
     margin-bottom: 30px;
 }
 
+/* ========== SECCIONES PRINCIPALES ========== */
 .numbers-section {
     background: white;
     border-radius: 15px;
@@ -157,6 +162,18 @@ h1 {
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
+.cart-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    height: fit-content;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========== CONTROLES Y BOTONES ========== */
 .controls {
     display: flex;
     justify-content: space-between;
@@ -193,6 +210,17 @@ h1 {
     color: white;
 }
 
+.btn-participate {
+    background: linear-gradient(45deg, #ff9500, #ff6b00);
+    color: white;
+}
+
+.btn-participate:hover {
+    background: linear-gradient(45deg, #e68900, #e65f00);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 149, 0, 0.3);
+}
+
 .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.2);
@@ -204,6 +232,41 @@ h1 {
     transform: none;
 }
 
+.btn-small {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-small:hover {
+    transform: translateY(-1px);
+}
+
+.copy-code-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.copy-code-btn:hover {
+    background: #45a049;
+    transform: translateY(-1px);
+}
+
+.copy-code-btn:active {
+    transform: translateY(0);
+}
+
+/* ========== GRID DE NÚMEROS ========== */
 .numbers-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
@@ -254,7 +317,6 @@ h1 {
     border-color: #ff6b6b !important;
 }
 
-/* NUEVO FASE 15C: Botón eliminar número individual */
 .delete-number {
     position: absolute;
     top: -5px;
@@ -283,23 +345,7 @@ h1 {
     background: #d32f2f;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1.1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1.1); }
-}
-
-.cart-section {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    height: fit-content;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
+/* ========== CARRITO Y CART ========== */
 .cart-header {
     display: flex;
     align-items: center;
@@ -372,7 +418,7 @@ h1 {
     padding: 20px;
 }
 
-/* Modales */
+/* ========== MODALES ========== */
 .modal {
     position: fixed;
     top: 0;
@@ -441,16 +487,32 @@ h1 {
     margin-top: 20px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-@keyframes slideIn {
-    from { transform: translateY(-50px) scale(0.8); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #666;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    z-index: 1;
+    transition: color 0.3s ease;
 }
 
+.password-toggle:hover {
+    color: #333;
+}
+
+/* ========== GANADORES Y RESULTADOS ========== */
 .winner-display {
     font-size: 3rem;
     font-weight: bold;
@@ -467,6 +529,19 @@ h1 {
     text-align: center;
 }
 
+.winner-badge {
+    background: linear-gradient(45deg, #ffd700, #ffb347);
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin: 5px 0;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+/* ========== NOTIFICACIONES ========== */
 .notification {
     position: fixed;
     top: 100px;
@@ -484,11 +559,7 @@ h1 {
     background: #ff6b6b;
 }
 
-@keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
+/* ========== TARJETAS DE RIFAS ========== */
 .rifas-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -547,13 +618,13 @@ h1 {
     color: #666;
 }
 
+/* ========== ELEMENTOS ESPECÍFICOS ========== */
 .loading {
     text-align: center;
     padding: 40px;
     color: #666;
 }
 
-/* Estilos específicos Fase 15c */
 .access-code-display {
     background: linear-gradient(45deg, #667eea, #764ba2);
     color: white;
@@ -589,67 +660,6 @@ h1 {
     font-size: 0.9rem;
 }
 
-/* NUEVO: Botón de copiar código */
-.copy-code-btn {
-    background: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    margin-left: 10px;
-    transition: all 0.3s ease;
-}
-
-.copy-code-btn:hover {
-    background: #45a049;
-    transform: translateY(-1px);
-}
-
-.copy-code-btn:active {
-    transform: translateY(0);
-}
-
-/* NUEVO: Botón participar diferenciado */
-.btn-participate {
-    background: linear-gradient(45deg, #ff9500, #ff6b00);
-    color: white;
-}
-
-.btn-participate:hover {
-    background: linear-gradient(45deg, #e68900, #e65f00);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 149, 0, 0.3);
-}
-
-/* NUEVO FASE 15C: Toggle de contraseña mejorado */
-.password-field {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.password-toggle {
-    position: absolute;
-    right: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
-    color: #666;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    z-index: 1;
-    transition: color 0.3s ease;
-}
-
-.password-toggle:hover {
-    color: #333;
-}
-
-/* NUEVO FASE 15C: Gestión de usuarios con números */
 .user-entry {
     display: flex;
     justify-content: space-between;
@@ -681,33 +691,29 @@ h1 {
     gap: 5px;
 }
 
-.btn-small {
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* ========== ANIMACIONES ========== */
+@keyframes pulse {
+    0% { transform: scale(1.1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1.1); }
 }
 
-.btn-small:hover {
-    transform: translateY(-1px);
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-/* NUEVO FASE 15K: Indicador de simulación completada */
-.winner-badge {
-    background: linear-gradient(45deg, #ffd700, #ffb347);
-    color: #333;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    margin: 5px 0;
-    display: inline-block;
-    animation: pulse 2s infinite;
+@keyframes slideIn {
+    from { transform: translateY(-50px) scale(0.8); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-/* MEJORADO FASE 15E: Media queries responsive */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 768px) {
     .nav-container {
         padding: 0 15px;
@@ -751,7 +757,6 @@ h1 {
         gap: 20px;
     }
     
-    /* Grid de detalles de rifa responsive */
     .rifa-details-grid {
         grid-template-columns: 1fr !important;
         gap: 20px !important;
@@ -800,7 +805,7 @@ h1 {
     }
     
     .user-info {
-        display: none; /* Ocultar en pantallas muy pequeñas */
+        display: none;
     }
 
     .numbers-grid {

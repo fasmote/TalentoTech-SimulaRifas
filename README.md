@@ -1,439 +1,260 @@
-# 🎲 SimulaRifa TT - Simulador de Rifas Completo
+# 🎲 SimulaRifas - TalentoTech
 
-Sistema completo de simulación de rifas con backend Node.js + Express + SQLite y frontend JavaScript vanilla.
+![Estado del Proyecto](https://img.shields.io/badge/Estado-En%20Desarrollo-yellow)
+![Versión](https://img.shields.io/badge/Versión-1.0.0-blue)
+![Licencia](https://img.shields.io/badge/Licencia-MIT-green)
 
-## 🚀 **Estado Actual: Sistema Completamente Funcional (Fase 15P)**
+**Simulador de Rifas Educativo** - Proyecto Final Integrador del curso Node.js de TalentoTech
 
-> ✅ **Sistema completamente estable** - CRUD perfecto, botones funcionando, interfaz sin errores, participación fluida
+## 📋 Descripción
 
-### 🎯 **Funcionalidades Principales**
-- ✅ **Sistema completo de rifas** - Crear, gestionar y sortear simulaciones
-- ✅ **Acceso por código** - Participación anónima con códigos de 6 caracteres
-- ✅ **Simulaciones completadas** - Ver ganadores de sorteos finalizados
-- ✅ **Gestión de usuarios** - Registro, login, dashboard personal
-- ✅ **Interfaz responsive** - Mobile-first design optimizado
-- ✅ **API RESTful completa** - Backend profesional con endpoints seguros
-- ✅ **Participación fluida** - Feedback visual inmediato sin reseteos
+SimulaRifas es una aplicación web educativa que simula el funcionamiento de rifas y sorteos sin involucrar dinero real. Desarrollada como proyecto final para el curso de Node.js de TalentoTech, implementa una arquitectura completa con frontend interactivo y backend robusto.
 
-### 🔧 **Últimas Correcciones (Fase 15P)**
-- ✅ **Bug de reseteo visual solucionado** - Participación por código sin reseteo de grilla
-- ✅ **Feedback visual inmediato** - Los números aparecen ocupados instantáneamente
-- ✅ **Experiencia fluida** - Sin recargas innecesarias de vista completa
-- ✅ **Actualización quirúrgica** - Solo se actualiza lo que cambió
-- ✅ **Consistencia backend-frontend** - Sincronización perfecta de datos
-- ✅ **Función viewRifa() duplicada eliminada** - Solucionado ReferenceError crítico
-- ✅ **Botones "Ver" y "Editar"** - Funcionamiento perfecto restaurado
-- ✅ **Código limpio** - Funciones duplicadas eliminadas, lógica unificada
-- ✅ **Sistema estable** - Todas las funcionalidades operativas
-- ✅ **CRUD completo** - Crear, ver, editar, eliminar simulaciones
-- ✅ **Interfaz consistente** - UX fluida sin errores JavaScript
+### 🎯 Características Principales
 
-## 🚀 **Instalación y Configuración**
+- **Simulador Interactivo**: Interfaz intuitiva para seleccionar números y realizar sorteos
+- **Gestión de Usuarios**: Sistema de autenticación con JWT
+- **Rifas Privadas**: Creación y gestión de simulaciones con códigos de acceso
+- **Rifas Públicas**: Contenido de demostración accesible sin registro
+- **API RESTful**: Backend modular con arquitectura MVC
+- **Responsive Design**: Adaptable a dispositivos móviles y desktop
 
-### 1. **Instalar dependencias del backend**
+## 🚀 Demo en Vivo
 
-```bash
-cd backend
-npm install
-```
+- **Frontend**: [https://talento-tech-simula-rifas.vercel.app/](https://talento-tech-simula-rifas.vercel.app/)
+- **Repositorio**: [https://github.com/fasmote/TalentoTech-SimulaRifas](https://github.com/fasmote/TalentoTech-SimulaRifas)
 
-### 2. **Inicializar base de datos**
+## 🛠️ Tecnologías Utilizadas
 
-```bash
-# Inicializar base de datos vacía
-node database/init.js
+### Frontend
+- **HTML5** - Estructura semántica
+- **CSS3** - Estilos modernos con Flexbox y Grid
+- **JavaScript ES6+** - Lógica interactiva
+- **Fetch API** - Comunicación con el backend
 
-# O usar script npm
-npm run init-db
-```
+### Backend
+- **Node.js** - Entorno de ejecución
+- **Express.js** - Framework web
+- **JWT** - Autenticación de usuarios
+- **JSON** - Almacenamiento de datos (migración a Firebase en progreso)
+- **CORS** - Configuración de dominios cruzados
 
-### 3. **Ejecutar el servidor**
+### Deploy y Herramientas
+- **Vercel** - Plataforma de despliegue
+- **Git/GitHub** - Control de versiones
+- **VS Code** - Editor de código
 
-```bash
-# Modo desarrollo (recomendado)
-npm run dev
-
-# Modo producción
-npm start
-```
-
-El servidor se ejecutará en `http://localhost:3000`
-
-### 4. **Usuario de prueba predefinido**
-- **Usuario:** admin
-- **Contraseña:** 123456
-- **Email:** admin@talentotech.com
-
-## 📁 **Estructura del Proyecto**
+## 📁 Estructura del Proyecto
 
 ```
 TT_rifas_LIMPIA_LIMPIA/
-├── backend/
-│   ├── app.js                 # Servidor principal Express
-│   ├── package.json          # Dependencias y scripts NPM
-│   ├── .env                  # Variables de entorno
-│   ├── database/
-│   │   ├── database.js       # Conexión SQLite + helpers
-│   │   ├── init.js          # Inicialización base de datos
-│   │   └── rifas.db         # Base de datos SQLite
-│   ├── routes/
-│   │   ├── auth.js          # Rutas autenticación JWT
-│   │   └── rifas.js         # API completa simulaciones
-│   └── middleware/
-│       └── auth.js          # Middleware autenticación
-├── frontend/
-│   └── index.html           # Aplicación SPA completa
-├── plan_fases_talentotech.md # Plan de desarrollo
-└── README.md               # Este archivo
+├── public/                  # Archivos estáticos
+│   ├── css/
+│   │   └── styles.css      # Estilos principales
+│   ├── js/
+│   │   ├── app.js          # Lógica principal
+│   │   └── rifas.js        # Funciones de rifas
+│   └── index.html          # Página principal
+├── backend/                 # Servidor Node.js (en desarrollo)
+│   ├── controllers/        # Lógica de negocio
+│   ├── models/             # Modelos de datos
+│   ├── routes/             # Rutas de la API
+│   ├── services/           # Servicios de datos
+│   └── server.js           # Servidor principal
+├── docs/                   # Documentación
+├── .gitignore              # Archivos ignorados
+├── .env.example            # Variables de entorno
+├── README.md               # Este archivo
+└── PRODUCTO.md             # Requerimientos detallados
 ```
 
-## 🎯 **Funcionalidades Completas**
+## 🚀 Instalación y Configuración
 
-### 🆓 **Sin Autenticación (Acceso Público)**
-- ✅ **Simulador demo** - Rifas 0-99 con selección manual/aleatoria
-- ✅ **Sorteos con animaciones** - Ganadores destacados en dorado
-- ✅ **Simulaciones públicas** - Ver rifas de ejemplo sin registro
-- ✅ **Acceso por código** - Participar en simulaciones privadas
-- ✅ **Ver resultados** - Acceder a simulaciones completadas
-- ✅ **Interfaz responsive** - Optimizada para móviles
+### Prerrequisitos
+- **Node.js** (versión 14 o superior)
+- **npm** o **yarn**
+- Navegador web moderno
 
-### 👤 **Con Autenticación (Usuario Registrado)**
-- ✅ **Registro y login** - Autenticación JWT segura
-- ✅ **"Mis Simulaciones"** - Dashboard personal completo
-- ✅ **CRUD completo** - Crear, ver, editar, eliminar simulaciones
-- ✅ **Códigos únicos** - Generación automática de códigos de acceso
-- ✅ **Copiar códigos** - Botones para compartir fácilmente
-- ✅ **Realizar sorteos** - Sorteos aleatorios con ganadores
-- ✅ **Ver resultados** - Simulaciones completadas con ganadores
-- ✅ **Estadísticas** - Progreso y participación en tiempo real
+### Instalación Local
 
-### 🎨 **Experiencia de Usuario**
-- ✅ **Interfaz moderna** - Diseño profesional con gradientes
-- ✅ **Feedback visual** - Notificaciones, loading states, animaciones
-- ✅ **Mobile-first** - Diseño optimizado para dispositivos móviles
-- ✅ **Navegación intuitiva** - SPA con routing dinámico
-- ✅ **Estados diferenciados** - UI adapta según estado de simulación
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/fasmote/TalentoTech-SimulaRifas.git
+   cd TalentoTech-SimulaRifas
+   ```
 
-## 🔧 **API Endpoints Completa**
+2. **Instalar dependencias del backend**
+   ```bash
+   cd backend
+   npm install
+   ```
 
-### **Autenticación**
-```
-POST /api/auth/register     # Registro de usuarios
-POST /api/auth/login        # Login con JWT
-GET  /api/auth/me          # Información usuario actual
-POST /api/auth/logout      # Logout seguro
-```
+3. **Configurar variables de entorno**
+   ```bash
+   cp .env.example .env
+   # Editar .env con tus configuraciones
+   ```
 
-### **Simulaciones (Rifas)**
-```
-GET    /api/rifas           # Simulaciones públicas
-GET    /api/rifas/my        # Mis simulaciones (requiere auth)
-GET    /api/rifas/my/:id    # Mi simulación específica (requiere auth)
-POST   /api/rifas           # Crear simulación (requiere auth)
-PUT    /api/rifas/:id       # Editar simulación (requiere auth)
-DELETE /api/rifas/:id       # Eliminar simulación (requiere auth)
-POST   /api/rifas/:id/draw  # Realizar sorteo (requiere auth)
-```
+4. **Iniciar el servidor backend**
+   ```bash
+   npm run dev
+   ```
 
-### **Códigos de Acceso**
-```
-GET  /api/rifas/access/:code         # Acceder por código
-POST /api/rifas/access/:code/numbers # Participar con código
-GET  /api/rifas/:id/numbers         # Ver números seleccionados
-POST /api/rifas/:id/numbers         # Seleccionar números
-```
+5. **Abrir el frontend**
+   - Abrir `public/index.html` en el navegador
+   - O usar un servidor local como Live Server
 
-## 🗄️ **Base de Datos (SQLite)**
-
-### **Tablas Principales**
-```sql
--- Usuarios registrados
-users (id, username, email, password_hash, created_at)
-
--- Simulaciones
-rifas (id, user_id, title, description, access_code, 
-       is_public, status, winner_number, created_at)
-
--- Números seleccionados
-rifa_numbers (id, rifa_id, number, participant_name, selected_at)
-```
-
-### **Estados de Simulación**
-- **`active`** - Simulación activa, aceptando participantes
-- **`completed`** - Sorteo realizado, ganador determinado
-
-## 🔑 **Guía de Uso Completa**
-
-### **Para Creadores (Usuarios Registrados)**
-
-1. **Registrarse/Iniciar sesión**
-   - Ir a "INICIAR SESIÓN"
-   - Crear cuenta o usar admin/123456
-
-2. **Crear simulación**
-   - Automáticamente va a "Mis Simulaciones"
-   - Botón "CREAR NUEVA SIMULACIÓN"
-   - Título y descripción
-
-3. **Gestionar simulación**
-   - **Ver**: Estado, números ocupados, estadísticas
-   - **Editar**: Cambiar título/descripción
-   - **Copiar código**: Compartir con participantes
-   - **Realizar sorteo**: Cuando haya participantes
-
-4. **Ver resultados**
-   - Número ganador destacado en dorado
-   - Nombre del participante ganador
-   - Simulación marcada como completada
-
-### **Para Participantes (Sin Registro)**
-
-1. **Acceder por código**
-   - Ir a "Acceder por Código"
-   - Ingresar código de 6 caracteres
-   - Ejemplos: ABCD12, XY7890
-
-2. **Participar**
-   - Seleccionar números disponibles (no rojos)
-   - Ingresar nombre requerido
-   - Confirmar participación
-
-3. **Ver simulaciones completadas**
-   - Usar mismo código después del sorteo
-   - Ver número ganador en dorado
-   - Información completa del resultado
-
-## 🎨 **Tipos de Simulaciones**
-
-### **🔓 Públicas (Demo)**
-- Visibles en "Simulaciones Públicas"
-- Sin código de acceso
-- Solo lectura/demostración
-- Datos de ejemplo
-
-### **🔒 Privadas (Con Código)**
-- Creadas por usuarios registrados
-- Código único de 6 caracteres alfanuméricos
-- Participación anónima con nombre
-- **Accesibles después del sorteo** para ver ganador
-
-### **🏆 Completadas**
-- Estado final después del sorteo
-- Número ganador destacado visualmente
-- Acceso por código mantenido
-- Información del participante ganador
-
-## 🔄 **Flujo Completo del Sistema**
-
-### **🆕 NUEVA MEJORA FASE 15P - Participación Fluida**
-
-#### **✅ Bug de Reseteo Visual Solucionado**
-- **Problema anterior**: Los números seleccionados desaparecían visualmente después de participar exitosamente
-- **Solución implementada**: Actualización directa de grilla sin recarga completa de vista
-- **Resultado**: Feedback visual inmediato y experiencia fluida
-- **Beneficio**: Los números aparecen ocupados (rojos) instantáneamente tras participar
-
-#### **📊 Mejoras Técnicas**
-- Eliminación de `viewRifaByCode()` innecesaria en `participateInRifa()`
-- Implementación de `generateRifaGrid()` para actualización quirúrgica
-- Reordenamiento del reseteo de `selectedNumbers[]` después de actualizar UI
-- Validación mejorada de datos del backend antes de actualizar interfaz
-
-### **1. Creación → 2. Participación → 3. Sorteo → 4. Resultado**
-
-```
-[Creador]                 [Participantes]              [Resultado]
-Registrarse          →    Acceder por código     →     Ver ganador
-Crear simulación     →    Seleccionar números   →     Número dorado
-Generar código       →    Confirmar participación →    Nombre visible
-Compartir código     →    Esperar sorteo        →     Estado completado
-Realizar sorteo      →    ✅ ACCESO MANTENIDO   →     ✅ SIEMPRE VISIBLE
-```
-
-## 📱 **Diseño Responsive**
-
-### **Desktop (≥768px)**
-```
-┌─────────────────┬────────────────┐
-│  Grilla Numbers │   Panel Info   │
-│   100 números   │  • Progreso    │
-│   Clickeables   │  • Código      │
-│                 │  • Acciones    │
-└─────────────────┴────────────────┘
-```
-
-### **Mobile (<768px)**
-```
-┌─────────────────────────────────┐
-│        Grilla Números           │
-│         Responsive              │
-├─────────────────────────────────┤
-│         Panel Info              │
-│      Debajo en móvil            │
-└─────────────────────────────────┘
-```
-
-## 🛡️ **Seguridad Implementada**
-
-- **🔐 Autenticación JWT** - Tokens seguros con expiración
-- **🔒 Contraseñas encriptadas** - bcrypt con salt
-- **🛡️ Validación de entrada** - Sanitización de datos
-- **🚫 Protección de rutas** - Middleware de autenticación
-- **🔑 Códigos únicos** - Generación segura alfanumérica
-- **🌐 CORS configurado** - Headers de seguridad
-
-## ✅ **Cumplimiento Requisitos TalentoTech**
-
-### **✅ Estructura Modular (MVC)**
-```
-/controllers  - Lógica de negocio ✅ (implementado)
-/models      - Estructura datos ✅ (database/)
-/routes      - Rutas API ✅ (auth.js, rifas.js)
-/services    - Acceso datos ✅ (database.js)
-/public      - Archivos estáticos ✅ (frontend/)
-```
-
-### **✅ API RESTful Completa**
-- **GET, POST, PUT, DELETE** - Todos los métodos HTTP ✅
-- **Códigos de respuesta** - 200, 201, 400, 404, 500 ✅
-- **Headers apropiados** - Content-Type, Authorization ✅
-- **Manejo de errores** - Respuestas descriptivas ✅
-
-### **✅ Base de Datos**
-- **Local (JSON)** - ✅ Implementado en desarrollo
-- **Firebase/Firestore** - 🔄 Preparado para migración
-- **Estructura relacional** - ✅ 3 tablas relacionadas
-
-### **✅ Autenticación y Seguridad**
-- **JWT tokens** - ✅ Implementado
-- **Middleware auth** - ✅ Protección de rutas
-- **Validación usuarios** - ✅ Registro/login seguro
-
-### **✅ Deploy en Producción**
-- **URL pública** - 🔄 Preparado para Vercel/Railway
-- **Variables entorno** - ✅ Configuración production
-- **Scripts deployment** - ✅ npm start/build
-
-## 🚀 **Scripts Disponibles**
+### Scripts Disponibles
 
 ```bash
-# Backend
-npm start           # Servidor producción
-npm run dev         # Servidor desarrollo con nodemon
-npm run init-db     # Inicializar base de datos
-
-# Verificación
-npm run verify      # Verificar funcionamiento
+npm run dev          # Iniciar servidor en modo desarrollo
+npm start            # Iniciar servidor en producción
+npm run demo-content # Crear contenido de demostración
+npm test             # Ejecutar pruebas
 ```
 
-## 🌍 **Deploy en Producción**
+## 📖 Uso de la Aplicación
 
-### **Variables de Entorno (.env)**
-```bash
-PORT=3000
-JWT_SECRET=tu_jwt_secret_super_secreto_largo
-NODE_ENV=production
+### 🎮 Modo Demo (Sin Registro)
+1. Visita la página principal
+2. Selecciona números haciendo clic en la grilla
+3. Usa "Elegir al Azar" para selección automática
+4. Haz clic en "Simular Sorteo" para ver el ganador
+
+### 👤 Modo Registrado
+1. **Crear Cuenta**: Registrarte con usuario, email y contraseña
+2. **Crear Simulaciones**: Título y descripción personalizados
+3. **Compartir Código**: Código de 6 caracteres para participantes
+4. **Gestionar**: Editar, ver estadísticas y realizar sorteos
+
+### 🔑 Acceso por Código
+1. Ve a "Acceder por Código"
+2. Ingresa el código de 6 caracteres
+3. Selecciona números y participa
+4. El propietario puede realizar el sorteo
+
+## 🎯 Funcionalidades Principales
+
+### Para Usuarios Anónimos
+- ✅ Simulador de demostración
+- ✅ Visualización de rifas públicas
+- ✅ Acceso por código a rifas privadas
+
+### Para Usuarios Registrados
+- ✅ Crear simulaciones personalizadas
+- ✅ Gestionar rifas (editar, eliminar)
+- ✅ Códigos de acceso únicos
+- ✅ Realizar sorteos automatizados
+- ✅ Estadísticas de participación
+
+### API Backend
+- ✅ Autenticación JWT
+- ✅ CRUD completo de rifas
+- ✅ Participación en rifas
+- ✅ Sorteos automatizados
+- ✅ Manejo de errores
+
+## 🔧 API Endpoints
+
+### Autenticación
+```http
+POST /api/auth/register    # Registrar usuario
+POST /api/auth/login       # Iniciar sesión
+POST /api/auth/logout      # Cerrar sesión
+GET  /api/auth/me          # Datos del usuario actual
 ```
 
-### **Platforms Compatibles**
-- ✅ **Vercel** - Deployment automático
-- ✅ **Railway** - Database + backend
-- ✅ **Heroku** - Full stack deployment
-- ✅ **Netlify** - Frontend + serverless functions
+### Rifas
+```http
+GET    /api/rifas          # Listar rifas públicas
+POST   /api/rifas          # Crear nueva rifa
+GET    /api/rifas/my       # Mis rifas
+GET    /api/rifas/my/:id   # Ver mi rifa específica
+PUT    /api/rifas/:id      # Actualizar rifa
+DELETE /api/rifas/:id      # Eliminar rifa
+```
 
-## 📊 **Métricas del Proyecto Final**
+### Participación
+```http
+GET  /api/rifas/access/:code     # Acceder por código
+POST /api/rifas/:id/participate  # Participar en rifa
+POST /api/rifas/:id/draw         # Realizar sorteo
+```
 
-### **Código**
-- **Frontend**: ~2,800 líneas (HTML + CSS + JS avanzado)
-- **Backend**: ~1,200 líneas (Node.js + Express + SQLite)
-- **Total**: ~4,000 líneas de código original
+## 🔒 Seguridad y Consideraciones
 
-### **Funcionalidades**
-- **20+ endpoints API** - RESTful completa
-- **6 páginas principales** - SPA navegable
-- **3 tipos de usuarios** - Anónimo, Registrado, Admin
-- **4 estados simulación** - Creación, Activa, Participación, Completada
-- **CRUD completo** - Create, Read, Update, Delete
+### Legales
+- **Sin dinero real**: Aplicación educativa únicamente
+- **Cumple normativas**: No constituye juego de apuestas
+- **Datos ficticios**: Participantes y premios simulados
 
-### **Tecnologías**
-- **Backend**: Node.js, Express.js, SQLite3, JWT, bcrypt
-- **Frontend**: HTML5, CSS3, JavaScript ES6+, Fetch API, SPA
-- **Tools**: npm, nodemon, Git
+### Técnicas
+- **JWT Tokens**: Autenticación segura
+- **Validación**: Datos de entrada sanitizados
+- **CORS**: Configuración de dominios permitidos
+- **Rate Limiting**: Protección contra spam (en desarrollo)
 
-## 🎯 **Características Destacadas**
+## 🚧 Estado del Desarrollo
 
-### **🎨 UX/UI Profesional**
-- Gradientes modernos y animaciones
-- Estados de loading y feedback visual
-- Diseño mobile-first responsive
-- Navegación intuitiva SPA
+### ✅ Completado
+- Frontend responsivo completo
+- Sistema de autenticación
+- CRUD de rifas y usuarios
+- Simulador interactivo
+- Deploy en Vercel
 
-### **🔧 Funcionalidad Robusta**
-- CRUD completo de simulaciones
-- Sistema de códigos únicos
-- Sorteos aleatorios justos
-- Persistencia de resultados
+### 🔄 En Progreso
+- **Fase 16**: Arquitectura MVC backend
+- **Fase 17**: API RESTful independiente
+- **Fase 18**: Migración a Firebase/Firestore
 
-### **🛡️ Seguridad Profesional**
-- Autenticación JWT moderna
-- Protección de rutas sensibles
-- Validación de datos completa
-- Manejo de errores robusto
+### 📋 Próximas Features
+- Notificaciones push
+- Analytics de rifas
+- Exportación de resultados
+- Modo oscuro
+- Internacionalización
 
-### **📱 Accesibilidad Total**
-- Funciona sin registro (demo)
-- Participación anónima por código
-- Acceso a resultados permanente
-- Interfaz responsive universal
+## 🤝 Contribución
 
-## 📋 **Checklist Cumplimiento**
+Este proyecto es parte de un curso educativo, pero las contribuciones son bienvenidas:
 
-### **✅ Requerimientos Obligatorios**
-- [x] Servidor Node.js + Express.js
-- [x] Estructura modular MVC
-- [x] Base de datos (SQLite → preparado Firebase)
-- [x] API RESTful completa
-- [x] Autenticación JWT
-- [x] Frontend conectado
-- [x] Deploy preparado
-- [x] README completo
+1. Fork del repositorio
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
 
-### **✅ Funcionalidades Extra**
-- [x] SPA navegable sin recarga
-- [x] Diseño responsive mobile-first
-- [x] Sistema de códigos únicos
-- [x] Participación anónima
-- [x] Resultados persistentes
-- [x] UX moderna con animaciones
+## 📄 Licencia
 
-## 🏆 **Estado Final: PROYECTO COMPLETO**
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
-> **✅ Sistema completamente funcional con todas las características implementadas**
+## 👨‍💻 Autor
 
-**El simulador de rifas está listo para:**
-- ✅ **Demostración en clase**
-- ✅ **Evaluación de proyecto final**
-- ✅ **Deploy en producción**
-- ✅ **Uso real en eventos**
+**Claudia** - Estudiante TalentoTech Node.js
+- GitHub: [@fasmote](https://github.com/fasmote)
+- Proyecto: [TalentoTech-SimulaRifas](https://github.com/fasmote/TalentoTech-SimulaRifas)
+
+## 🙏 Agradecimientos
+
+- **TalentoTech** por la excelente formación en Node.js
+- **Profesores y compañeros** por el apoyo constante
+- **Comunidad open source** por las herramientas utilizadas
+
+## 📞 Soporte
+
+Si tienes problemas o preguntas:
+
+1. Revisa la documentación en `PRODUCTO.md`
+2. Busca en [Issues](https://github.com/fasmote/TalentoTech-SimulaRifas/issues)
+3. Crea un nuevo issue si es necesario
 
 ---
 
-## 📞 **Soporte y Documentación**
+<div align="center">
 
-### **Archivos de Referencia**
-- `plan_fases_talentotech.md` - Plan completo de desarrollo
-- `FASE15*_COMPLETADA.md` - Documentación de cada fase
-- `backend/routes/` - Documentación API en código
+**🎲 SimulaRifas - Aprendiendo Node.js con TalentoTech 🎲**
 
-### **Resolución de Problemas**
-1. **Base de datos**: `npm run init-db`
-2. **Dependencias**: `npm install` en carpeta backend
-3. **Puerto ocupado**: Cambiar PORT en .env
-4. **Tokens JWT**: Verificar JWT_SECRET en .env
+[Demo](https://talento-tech-simula-rifas.vercel.app/) • [Documentación](PRODUCTO.md) • [Reporte de Bug](https://github.com/fasmote/TalentoTech-SimulaRifas/issues)
 
----
-
-**🎓 Proyecto Final Integrador - TalentoTech 2025**  
-**🎯 SimulaRifa TT - Sistema Completo de Simulación de Rifas**  
-**✅ Cumple 100% con todos los requerimientos del curso**  
-**🚀 Listo para producción y evaluación**
+</div>
