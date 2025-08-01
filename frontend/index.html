@@ -1861,8 +1861,8 @@
 
                 if (response.ok) {
                     showNotification(`¡Participación exitosa! Números registrados para ${participantName}`);
-                    // Recargar la vista para actualizar
-                    viewRifaByCode(data.rifa, data.rifa.access_code);
+                    // FASE 15T: Actualizar solo los números participados, no toda la vista
+                    updateNumbersAfterParticipation(selectedNumbers);
                 } else {
                     showNotification(data.error || 'Error al participar', 'error');
                 }
@@ -2726,6 +2726,29 @@
                     }
                 }
             });
+            selectedNumbers = [];
+            updateCart();
+        }
+
+        // NUEVA FUNCIÓN FASE 15T: Actualizar números sin regenerar toda la vista
+        function updateNumbersAfterParticipation(participatedNumbers) {
+            // Marcar números como vendidos visualmente
+            participatedNumbers.forEach(number => {
+                const cell = document.getElementById(`number-${number}`);
+                if (cell) {
+                    cell.classList.remove('selected');
+                    cell.classList.add('sold');
+                    cell.onclick = null; // Deshabilitar click
+                    
+                    // Remover botón de eliminación si existe
+                    const deleteBtn = cell.querySelector('.delete-number');
+                    if (deleteBtn) {
+                        deleteBtn.remove();
+                    }
+                }
+            });
+            
+            // Limpiar selección actual
             selectedNumbers = [];
             updateCart();
         }
