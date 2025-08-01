@@ -238,7 +238,7 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 ## 🙏 Agradecimientos
 
 - **TalentoTech** por la excelente formación en Node.js
-- **Profesores y compañeros** por el apoyo constante
+- **Prof. Jean Paul Ferreira** por la guía y enseñanza en Node.js
 - **Comunidad open source** por las herramientas utilizadas
 
 ## 📞 Soporte
