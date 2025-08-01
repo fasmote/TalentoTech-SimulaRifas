@@ -231,7 +231,7 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
 ## 👨‍💻 Autor
 
-**Claudia** - Estudiante TalentoTech Node.js
+**Claudio** - Estudiante TalentoTech Node.js
 - GitHub: [@fasmote](https://github.com/fasmote)
 - Proyecto: [TalentoTech-SimulaRifas](https://github.com/fasmote/TalentoTech-SimulaRifas)
 
