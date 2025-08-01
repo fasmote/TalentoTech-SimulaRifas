@@ -1609,10 +1609,22 @@ async function viewRifaByCode(rifa, accessCode) {
     const isCompleted = rifa.status === 'completed';
     const winnerNumber = rifa.winner ? rifa.winner.number : null;
     
+    // FEAT FASE 15W-PLUS: Información del creador
+    const creatorName = rifa.creator_username || rifa.creator_name || 'Usuario Anónimo';
+    const creatorDisplay = creatorName.charAt(0).toUpperCase() + creatorName.slice(1);
+    
     document.getElementById('mainContainer').innerHTML = `
         <div class="page-header">
             <h1>🎯 ${rifa.title}</h1>
             <p class="subtitle">Simulación privada - Acceso por código: ${accessCode}</p>
+            
+            <!-- FEAT FASE 15W-PLUS: Badge del creador visible -->
+            <div style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 12px 20px; border-radius: 25px; display: inline-block; margin: 15px 0; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                <span style="font-size: 1rem; font-weight: 600;">
+                    👤 Creada por: <strong>${creatorDisplay}</strong>
+                </span>
+            </div>
+            
             ${isCompleted ? `<p style="background: #4caf50; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-top: 10px;">
                 🏆 ¡SIMULACIÓN COMPLETADA! Ganador: Número ${winnerNumber} (${rifa.winner.participant_name})
             </p>` : ''}
@@ -1673,6 +1685,22 @@ async function viewRifaByCode(rifa, accessCode) {
                 <div style="margin-bottom: 20px;">
                     <h4 style="color: #333; margin-bottom: 10px;">📝 Descripción</h4>
                     <p style="color: #666; line-height: 1.5;">${rifa.description}</p>
+                </div>
+                
+                <!-- FEAT FASE 15W-PLUS: Información del creador en sidebar -->
+                <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #f8f9fa, #e9ecef); border-radius: 10px; border-left: 4px solid #667eea;">
+                    <h4 style="color: #333; margin-bottom: 10px; display: flex; align-items: center;">
+                        <span style="margin-right: 8px;">👤</span> Creador de la Simulación
+                    </h4>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="background: #667eea; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">
+                            ${creatorDisplay.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <p style="color: #333; font-weight: 600; margin: 0; font-size: 1.1rem;">${creatorDisplay}</p>
+                            <p style="color: #666; font-size: 0.9rem; margin: 0;">Organizador de la rifa</p>
+                        </div>
+                    </div>
                 </div>
                 
                 <div style="margin-bottom: 20px;">

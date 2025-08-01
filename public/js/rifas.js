@@ -276,13 +276,39 @@ async function participateInRifa(rifaId, selectedNumbers) {
 
         if (response.ok) {
             showNotification(`¡Participación exitosa! Números registrados para ${participantName}`);
-            viewRifaByCode(data.rifa, data.rifa.access_code);
+            
+            // FIX FASE 15W: Recargar datos frescos del servidor
+            console.log('🔄 [FASE 15W] Recargando datos frescos después de participar...');
+            await reloadRifaByCode(data.rifa.access_code);
         } else {
             showNotification(data.error || 'Error al participar', 'error');
         }
     } catch (error) {
         console.error('Error:', error);
         showNotification('Error de conexión', 'error');
+    }
+}
+
+// ========== FUNCIÓN AUXILIAR PARA RECARGAR DATOS FRESCOS ==========
+
+// FIX FASE 15W: Nueva función para recargar datos actualizados del servidor
+async function reloadRifaByCode(accessCode) {
+    try {
+        console.log(`🔄 [FASE 15W] Haciendo petición fresca para código: ${accessCode}`);
+        
+        const response = await fetch(`${API_BASE}/rifas/access/${accessCode}`);
+        const data = await response.json();
+        
+        if (response.ok && data.rifa) {
+            console.log('✅ [FASE 15W] Datos frescos recibidos:', data.rifa);
+            viewRifaByCode(data.rifa, accessCode);
+        } else {
+            console.error('❌ [FASE 15W] Error recargando datos:', data.error);
+            showNotification('Error recargando datos actualizados', 'error');
+        }
+    } catch (error) {
+        console.error('❌ [FASE 15W] Error de conexión al recargar:', error);
+        showNotification('Error de conexión al actualizar', 'error');
     }
 }
 
