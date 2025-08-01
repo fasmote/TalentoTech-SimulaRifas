@@ -948,8 +948,15 @@ async function participateInRifa(rifaId, selectedNumbers) {
 
         if (response.ok) {
             showNotification(`¡Participación exitosa! Números registrados para ${participantName}`);
-            // Recargar la vista para actualizar
-            viewRifaByCode(data.rifa, data.rifa.access_code);
+            
+            // FIX FASE 15P: Actualizar solo la grilla sin reseteo visual completo
+            if (data.rifa && data.rifa.sold_numbers) {
+                generateRifaGrid(data.rifa); // Regenerar grilla con números ocupados actualizados
+            }
+            
+            // Resetear selección DESPUÉS de actualizar la grilla
+            selectedNumbers = [];
+            updateCart();
         } else {
             showNotification(data.error || 'Error al participar', 'error');
         }

@@ -2,9 +2,9 @@
 
 Sistema completo de simulación de rifas con backend Node.js + Express + SQLite y frontend JavaScript vanilla.
 
-## 🚀 **Estado Actual: Sistema Completamente Funcional (Fase 15j)**
+## 🚀 **Estado Actual: Sistema Completamente Funcional (Fase 15P)**
 
-> ✅ **Sistema completamente estable** - CRUD perfecto, botones funcionando, interfaz sin errores
+> ✅ **Sistema completamente estable** - CRUD perfecto, botones funcionando, interfaz sin errores, participación fluida
 
 ### 🎯 **Funcionalidades Principales**
 - ✅ **Sistema completo de rifas** - Crear, gestionar y sortear simulaciones
@@ -13,8 +13,14 @@ Sistema completo de simulación de rifas con backend Node.js + Express + SQLite 
 - ✅ **Gestión de usuarios** - Registro, login, dashboard personal
 - ✅ **Interfaz responsive** - Mobile-first design optimizado
 - ✅ **API RESTful completa** - Backend profesional con endpoints seguros
+- ✅ **Participación fluida** - Feedback visual inmediato sin reseteos
 
-### 🔧 **Últimas Correcciones (Fase 15j)**
+### 🔧 **Últimas Correcciones (Fase 15P)**
+- ✅ **Bug de reseteo visual solucionado** - Participación por código sin reseteo de grilla
+- ✅ **Feedback visual inmediato** - Los números aparecen ocupados instantáneamente
+- ✅ **Experiencia fluida** - Sin recargas innecesarias de vista completa
+- ✅ **Actualización quirúrgica** - Solo se actualiza lo que cambió
+- ✅ **Consistencia backend-frontend** - Sincronización perfecta de datos
 - ✅ **Función viewRifa() duplicada eliminada** - Solucionado ReferenceError crítico
 - ✅ **Botones "Ver" y "Editar"** - Funcionamiento perfecto restaurado
 - ✅ **Código limpio** - Funciones duplicadas eliminadas, lógica unificada
@@ -218,6 +224,20 @@ rifa_numbers (id, rifa_id, number, participant_name, selected_at)
 - Información del participante ganador
 
 ## 🔄 **Flujo Completo del Sistema**
+
+### **🆕 NUEVA MEJORA FASE 15P - Participación Fluida**
+
+#### **✅ Bug de Reseteo Visual Solucionado**
+- **Problema anterior**: Los números seleccionados desaparecían visualmente después de participar exitosamente
+- **Solución implementada**: Actualización directa de grilla sin recarga completa de vista
+- **Resultado**: Feedback visual inmediato y experiencia fluida
+- **Beneficio**: Los números aparecen ocupados (rojos) instantáneamente tras participar
+
+#### **📊 Mejoras Técnicas**
+- Eliminación de `viewRifaByCode()` innecesaria en `participateInRifa()`
+- Implementación de `generateRifaGrid()` para actualización quirúrgica
+- Reordenamiento del reseteo de `selectedNumbers[]` después de actualizar UI
+- Validación mejorada de datos del backend antes de actualizar interfaz
 
 ### **1. Creación → 2. Participación → 3. Sorteo → 4. Resultado**
 
