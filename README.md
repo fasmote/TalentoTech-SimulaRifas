@@ -95,12 +95,22 @@ TT_rifas_LIMPIA_LIMPIA/
    # Editar .env con tus configuraciones
    ```
 
-4. **Iniciar el servidor backend**
+4. **Inicializar DB**
+   ```bash
+   npm run init-db
+   ```
+
+5. **Agregar contenido demo**
+   ```bash
+   npm run demo-content
+   ```
+   
+6. **Iniciar el servidor backend**
    ```bash
    npm run dev
    ```
 
-5. **Abrir el frontend**
+7. **Abrir el frontend**
    - Abrir `public/index.html` en el navegador
    - O usar un servidor local como Live Server
 
@@ -109,6 +119,7 @@ TT_rifas_LIMPIA_LIMPIA/
 ```bash
 npm run dev          # Iniciar servidor en modo desarrollo
 npm start            # Iniciar servidor en producción
+npm run init-db      # Iniciar DB  
 npm run demo-content # Crear contenido de demostración
 npm test             # Ejecutar pruebas
 ```
